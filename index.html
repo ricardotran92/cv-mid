@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Computer Vision midterm review: theory, worked 2022/2023 solutions, practice problems and the 114-1 quiz.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>CV Midterm Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: exam notebook with sticky tab bar, ~70ch text column, formula blocks and a faint calibration-grid hero */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#17202b; --muted:#5b6675; --line:#dde2e8;
+  --accent:#0f6b8f; --accent-soft:#e3f1f7; --warn:#a4520c; --warn-soft:#fbefe2;
+  --ok:#1f7a4a; --ok-soft:#e4f4ea; --bad:#b3261e; --bad-soft:#fbe9e7;
+  --grid:rgba(15,107,143,.06);
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141a; --surface:#161d25; --fg:#e4e9ef; --muted:#97a3b2; --line:#2a3440;
+  --accent:#5cc0e6; --accent-soft:#12303d; --warn:#f0a35c; --warn-soft:#3a2614;
+  --ok:#6ad39a; --ok-soft:#12301f; --bad:#ff8a80; --bad-soft:#3b1714;
+  --grid:rgba(92,192,230,.07); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#161d25; --fg:#e4e9ef; --muted:#97a3b2; --line:#2a3440;
+  --accent:#5cc0e6; --accent-soft:#12303d; --warn:#f0a35c; --warn-soft:#3a2614;
+  --ok:#6ad39a; --ok-soft:#12301f; --bad:#ff8a80; --bad-soft:#3b1714;
+  --grid:rgba(92,192,230,.07); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.65}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.hero{padding-block:40px 24px;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:var(--f-display);font-size:clamp(30px,5vw,46px);line-height:1.1;margin:8px 0 12px;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:28px;line-height:1.2;margin:40px 0 12px;text-wrap:balance}
+h3{font-size:19px;margin:28px 0 8px;text-wrap:balance}
+h4{font-size:16px;margin:20px 0 6px;color:var(--accent)}
+p,li{max-width:72ch}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.tabs a{flex:0 0 auto;padding:12px 14px;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;border-bottom:2px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+nav.tabs a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:8px 64px}
+section.view{min-width:0}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+.f{font-family:var(--f-mono);font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;margin:10px 0;line-height:1.8;white-space:pre-wrap}
+.note{background:var(--warn-soft);border-left:3px solid var(--warn);padding:10px 14px;border-radius:0 6px 6px 0;margin:12px 0;max-width:80ch}
+.note b:first-child{color:var(--warn)}
+.tip{background:var(--accent-soft);border-left:3px solid var(--accent);padding:10px 14px;border-radius:0 6px 6px 0;margin:12px 0;max-width:80ch}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;font-size:14.5px;min-width:100%}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface);font-weight:600}
+td.num,th.num{text-align:center;font-variant-numeric:tabular-nums;font-family:var(--f-mono)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.p-hi{background:var(--bad-soft);color:var(--bad)}
+.p-md{background:var(--warn-soft);color:var(--warn)}
+.p-lo{background:var(--accent-soft);color:var(--accent)}
+.mat{display:inline-grid;vertical-align:middle;gap:2px 12px;padding:2px 8px;margin:2px 4px;border-left:1.5px solid currentColor;border-right:1.5px solid currentColor;border-radius:5px;font-family:var(--f-mono);font-size:14px;text-align:center;font-variant-numeric:tabular-nums}
+.q{border-top:1px solid var(--line);padding-top:8px;margin-top:28px}
+.q h3{margin-top:12px}
+.q .pts{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-weight:400}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.card h4{margin-top:0}
+.card ol,.card ul{padding-left:20px;margin:6px 0}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.toc a{font-size:14px;color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:99px;padding:3px 12px;background:var(--surface)}
+/* quiz */
+.qz-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.qz-bar button,.qz-bar select{font:inherit;font-size:14px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.qz-bar button.on{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.score{font-family:var(--f-mono);font-size:14px;margin-left:auto;font-variant-numeric:tabular-nums}
+.mcq{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0}
+.mcq .qt{margin:0 0 10px;font-weight:500}
+.mcq .qn{font-family:var(--f-mono);color:var(--accent);margin-right:6px}
+.mcq .tag{font-size:11px;color:var(--muted);font-family:var(--f-mono);float:right;margin-left:8px}
+.opts{display:grid;gap:6px}
+.opts button{font:inherit;font-size:15px;text-align:left;padding:8px 12px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;display:flex;gap:8px}
+.opts button b{font-family:var(--f-mono)}
+.opts button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--fg)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opts button:disabled{cursor:default}
+.ex{margin:10px 0 0;font-size:14.5px;color:var(--muted)}
+.ex b{color:var(--ok)}
+@media (prefers-reduced-motion:no-preference){.opts button{transition:background .15s,border-color .15s}}
+@media (max-width:520px){h2{font-size:24px}.f{font-size:13px}}
+h2[id]{scroll-margin-top:64px}
+figure{margin:14px 0;max-width:720px}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+figcaption{font-size:12.5px;color:var(--muted);margin-top:4px;font-family:var(--f-mono)}
+figure.fig-md{max-width:520px}figure.fig-sm{max-width:340px}figure.fig-xs{max-width:220px}
+.slides{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:14px 0}
+.slides figure{margin:0;max-width:none;min-width:0}
+.slides.s3{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.slides.s4{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
+svg.diag{display:block;width:100%;height:auto;margin:14px 0}
+svg.diag[viewBox="0 0 160 160"]{max-width:120px}
+svg.diag[viewBox^="0 0 300"]{max-width:300px}svg.diag[viewBox^="0 0 320"]{max-width:320px}svg.diag[viewBox^="0 0 360"]{max-width:420px}svg.diag[viewBox^="0 0 420"]{max-width:440px}svg.diag[viewBox^="0 0 460"]{max-width:480px}svg.diag[viewBox^="0 0 520"]{max-width:540px}svg.diag[viewBox^="0 0 620"]{max-width:640px}
+</style>
+</head>
+<body>
+
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">4105109 Computer Vision · Midterm</div>
+    <h1>Computer Vision Midterm Review</h1>
+    <p class="lede">Built from the four lecture units (Introduction, Feature Extraction, Image Formation, Epipolar Geometry), the 2022 and 2023 midterms, and the 114-1 multiple-choice reference key. Figures are taken from the original lecture PDFs and exam papers.</p>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap">
+    <a href="#overview" data-v="overview">Overview</a>
+    <a href="#theory" data-v="theory">Theory</a>
+    <a href="#exam-2022" data-v="exam-2022">2022 Solutions</a>
+    <a href="#exam-2023" data-v="exam-2023">2023 Solutions</a>
+    <a href="#practice" data-v="practice">Slide Practice</a>
+    <a href="#quiz" data-v="quiz">114-1 Quiz</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================== OVERVIEW ===================== -->
+<section class="view" id="v-overview">
+<h2>What the exam keeps asking</h2>
+<p>The 2022 and 2023 midterms were written exams: 10 questions, 100 points. The 114-1 midterm switched to <b>109 multiple-choice questions</b> but covered the same topics, plus many quick calculations. The two written years repeat each other almost word for word: the Homography/Mosaics question is identical, and the Projection-matrix question grew from 12% to 15%.</p>
+
+<div class="tbl"><table>
+<thead><tr><th>Topic</th><th>Unit</th><th class="num">2022</th><th class="num">2023</th><th class="num">114-1 (questions)</th><th>Priority</th></tr></thead>
+<tbody>
+<tr><td>Projection matrix P from n 3D–2D pairs; decompose into K, R, T</td><td>3</td><td class="num">Q8 · 12%</td><td class="num">Q8 · 15%</td><td class="num">76, 84, 92, 93, 97</td><td><span class="pill p-hi">Always</span></td></tr>
+<tr><td>Homography &amp; Mosaics (conditions, linear system)</td><td>3</td><td class="num">Q7 · 12%</td><td class="num">Q9 · 12%</td><td class="num">69, 90, 99, 108</td><td><span class="pill p-hi">Always</span></td></tr>
+<tr><td>PCA &amp; Eigenface (covariance, reduction, recognition)</td><td>2</td><td class="num">Q5 · 12%</td><td class="num">Q5–6 · 10%</td><td class="num">16–19, 51–57, 81, 85, 98, 100, 105</td><td><span class="pill p-hi">Always</span></td></tr>
+<tr><td>K-means clustering</td><td>2</td><td class="num">Q10 · 9%</td><td class="num">Q7 · 10%</td><td class="num">63, 64, 83, 86</td><td><span class="pill p-hi">Always</span></td></tr>
+<tr><td>Harris Corner Detection (+ Sobel)</td><td>2</td><td class="num">Q3 · 5%</td><td class="num">Q2 · 16%</td><td class="num">11–14, 45, 46, 58, 59, 89, 106</td><td><span class="pill p-hi">Always</span></td></tr>
+<tr><td>Definition of CV, 5 applications, 5 challenges</td><td>1</td><td class="num">Q1 · 10%</td><td class="num">Q1 · 12%</td><td class="num">1, 7</td><td><span class="pill p-hi">Free points</span></td></tr>
+<tr><td>Co-occurrence matrix &amp; texture features</td><td>2</td><td class="num">Q2 · 12%</td><td class="num">Q3 · 4%</td><td class="num">20, 21, 47, 48, 79</td><td><span class="pill p-md">Frequent</span></td></tr>
+<tr><td>SIFT, DoG</td><td>2</td><td class="num">Q4 · 6%</td><td class="num">—</td><td class="num">22, 60–62, 78, 82, 94, 104</td><td><span class="pill p-md">Frequent</span></td></tr>
+<tr><td>HoG</td><td>2</td><td class="num">—</td><td class="num">Q4 · 8%</td><td class="num">49, 50, 107</td><td><span class="pill p-md">Frequent</span></td></tr>
+<tr><td>World → Camera → Film → Pixel coordinates, K[R|T]</td><td>3</td><td class="num">Q6 · 12%</td><td class="num">(inside Q8)</td><td class="num">28, 30, 31, 39, 67, 68, 72, 74, 88, 109</td><td><span class="pill p-md">Frequent</span></td></tr>
+<tr><td>Image formation: 4 factors, optics, photometry, sensor</td><td>3</td><td class="num">—</td><td class="num">Q10 · 13%</td><td class="num">24–27, 32–38, 71, 95, 101</td><td><span class="pill p-md">Frequent</span></td></tr>
+<tr><td>Epipolar geometry (figure, epipolar constraint)</td><td>4</td><td class="num">Q9 · 10%</td><td class="num">—</td><td class="num">103 (stereo depth)</td><td><span class="pill p-md">Study well</span></td></tr>
+<tr><td>Bag-of-Features, Spatial Pyramid Matching</td><td>2</td><td class="num">—</td><td class="num">—</td><td class="num">23, 65, 87</td><td><span class="pill p-lo">MCQ</span></td></tr>
+<tr><td>Camera calibration (chessboard, Zhang)</td><td>3</td><td class="num">—</td><td class="num">—</td><td class="num">91</td><td><span class="pill p-lo">MCQ</span></td></tr>
+</tbody></table></div>
+
+<div class="note"><b>Unknown:</b> the materials don't say whether this year's exam is written or multiple choice. Unit 4 (Epipolar) appeared only once (2022), but it is in this year's slides, so it is marked "study well".</div>
+
+<h3>Common ways to lose points</h3>
+<div class="grid2">
+  <div class="card"><h4>Co-occurrence: direction of d</h4>d = (drow, dcol) goes <b>from pixel i to pixel j</b>. Valid pairs = (rows − |drow|) × (cols − |dcol|); this is the denominator of N<sub>d</sub>. Always check the cells sum to that count.</div>
+  <div class="card"><h4>Sobel: correlation or convolution</h4>True convolution flips the mask 180°. The 2023 key accepts both. State which one you use and whether you zero-pad.</div>
+  <div class="card"><h4>PCA: divide by n − 1</h4>Sample covariance divides by n − 1. Subtract the mean first. The eigenvector with the largest λ is the principal component.</div>
+  <div class="card"><h4>Degrees of freedom</h4>Homography 3×3: 8 DoF, needs ≥ 4 pairs. Projection P 3×4: 11 DoF, needs ≥ 6 pairs (2 equations per pair). F: 7 DoF. E: 5 DoF.</div>
+  <div class="card"><h4>Which eigenvector?</h4>PCA: <b>largest</b> λ. Solving AP = 0 (for P, H, F, calibration b): eigenvector of AᵀA with the <b>smallest</b> λ.</div>
+  <div class="card"><h4>QR is applied to M⁻¹</h4>M = KR is the left 3×3 of P. QR(M⁻¹) = QR gives K = R⁻¹ and R<sub>rot</sub> = Q⁻¹ = Qᵀ, then T = K⁻¹P₄.</div>
+</div>
+</section>
+
+<!-- ===================== THEORY ===================== -->
+<section class="view" id="v-theory" hidden>
+<div class="toc"><a href="#theory" data-jump="c1">Unit 1 Introduction</a><a href="#theory" data-jump="c2">Unit 2 Feature Extraction</a><a href="#theory" data-jump="c3">Unit 3 Image Formation</a><a href="#theory" data-jump="c4">Unit 4 Epipolar Geometry</a></div>
+
+<h2 id="c1">Unit 1 · Introduction</h2>
+<p><b>Definition:</b> Computer Vision is the set of methods to <i>acquire, process and analyze</i> images and videos so that a computer understands the real world. Goal: produce numerical or symbolic information; in short, extract useful information.</p>
+<div class="slides">
+  <figure><img src="img/c1-3.jpg" alt="Slide: What is Computer Vision?" loading="lazy"><figcaption>Unit 1, slide 3</figcaption></figure>
+  <figure><img src="img/c1-5.jpg" alt="Slide: Computer Vision applications map" loading="lazy"><figcaption>Unit 1, slide 5 · applications</figcaption></figure>
+  <figure><img src="img/c1-7.jpg" alt="Slide: Computer Vision Tasks" loading="lazy"><figcaption>Unit 1, slide 7 · tasks</figcaption></figure>
+  <figure><img src="img/c1-8.jpg" alt="Slide: Fundamental Challenges" loading="lazy"><figcaption>Unit 1, slide 8 · fundamental challenges</figcaption></figure>
+</div>
+<div class="grid2">
+  <div class="card"><h4>Applications / tasks (list 5)</h4><ul><li>Image classification, object detection/recognition</li><li>Face recognition, vehicle re-identification</li><li>Action / gesture recognition, emotion detection</li><li>Image segmentation, scene analysis</li><li>3D reconstruction, augmented reality, anomaly detection</li></ul></div>
+  <div class="card"><h4>7 challenges</h4><ol><li>View point variation</li><li>Illumination</li><li>Occlusion</li><li>Scale</li><li>Deformation</li><li>Background clutter</li><li>Intra-class variation</li></ol></div>
+  <div class="card"><h4>Fundamental challenges</h4><ul><li>Input space is high dimensional</li><li>The mapping from images to models/actions is nonlinear; the optimal mapping is unreachable</li><li>Generalization from few examples</li><li>Finite memory and computational time</li></ul></div>
+</div>
+<div class="slides s4">
+  <figure><img src="img/c1-9.jpg" alt="Challenge 1: View point variation" loading="lazy"><figcaption>1 · View point</figcaption></figure>
+  <figure><img src="img/c1-10.jpg" alt="Challenge 2: Illumination" loading="lazy"><figcaption>2 · Illumination</figcaption></figure>
+  <figure><img src="img/c1-11.jpg" alt="Challenge 3: Occlusion" loading="lazy"><figcaption>3 · Occlusion</figcaption></figure>
+  <figure><img src="img/c1-12.jpg" alt="Challenge 4: Scale" loading="lazy"><figcaption>4 · Scale</figcaption></figure>
+  <figure><img src="img/c1-13.jpg" alt="Challenge 5: Deformation" loading="lazy"><figcaption>5 · Deformation</figcaption></figure>
+  <figure><img src="img/c1-14.jpg" alt="Challenge 6: Background clutter" loading="lazy"><figcaption>6 · Background clutter</figcaption></figure>
+  <figure><img src="img/c1-15.jpg" alt="Challenge 7: Intra-class variation" loading="lazy"><figcaption>7 · Intra-class variation</figcaption></figure>
+  <figure><img src="img/c1-16.jpg" alt="More challenges: explosion of digital data" loading="lazy"><figcaption>Explosion of digital data</figcaption></figure>
+</div>
+<p>Current trend: deep learning replaces the conventional <b>feature extraction</b> step (Input → Feature extraction → Learning algorithm → Model → Output).</p>
+
+<h2 id="c2">Unit 2 · Feature Extraction</h2>
+<p>By level: <b>Low-level</b> (histogram, gradient, convolution) · <b>Mid-level</b> (statistical texture, LBP, co-occurrence, Laws, Gabor, HoG, PCA, Harris) · <b>High-level</b> (SIFT, Bag-of-Features, SPM). By target: color, texture, shape, global features.</p>
+<div class="tip">2022 asked: "List three texture features, one shape feature, one color feature". Texture: LBP, co-occurrence matrix, Laws' texture, Gabor filters, edge density. Shape: HoG. Color: color (RGB) histogram.</div>
+<div class="note"><b>Figures for Unit 2:</b> the Unit 2 and Unit 3 lectures were uploaded as text-only files, so their slide images are not available. The figures in these two units come from the exam papers (which reproduce lecture figures) or are redrawn here.</div>
+
+<h3>Pixels, histograms, point processing</h3>
+<ul>
+<li>A pixel is the smallest element of an image. 8-bit grayscale: values 0–255 (255 = white), 1 byte per pixel. RGB = 3 layers, 3 bytes per pixel.</li>
+<li>300×200 image: 60,000 pixels. Grayscale: 60,000 bytes. RGB: 180,000 bytes.</li>
+<li>Point processing s = T(r): contrast stretching, thresholding (gives a binary image).</li>
+<li>Histogram: h(i) = v<sub>i</sub> for min ≤ i ≤ max, a discrete function describing the frequency distribution. For a 3×3 image: x-axis 0–255, y-axis 0–9.</li>
+</ul>
+
+<h3>Image gradient, Sobel, convolution, Gaussian</h3>
+<div class="f">∇I = (∂I/∂x, ∂I/∂y)      θ = tan⁻¹(dy/dx)      |∇I| = √(dx² + dy²)  (edge strength)
+Gaussian  G(x,y) = 1/(2πσ²) · exp(−(x²+y²)/(2σ²))   larger σ → more blur</div>
+<figure class="fig-sm"><img src="img/e23-000.png" alt="Sobel masks s_x and s_y" loading="lazy"><figcaption>Sobel operators s<sub>x</sub> and s<sub>y</sub> (from the 2023 exam)</figcaption></figure>
+<ul>
+<li>The gradient points in the direction of the largest intensity increase; its length is the rate of change. The gradient direction is perpendicular to the edge.</li>
+<li>Slide examples: vertical edge (dx = 255, dy ≈ 0) gives 0°; horizontal edge (dx ≈ 0, dy = −255) gives −90°; dx = dy = 255 gives 45°.</li>
+<li>Convolution: each output pixel is a weighted sum of neighbouring input pixels; the coefficient matrix is the convolution mask (filter). N×N image, k×k mask, no padding: output (N − k + 1)².</li>
+<li>Gaussian filtering blurs (smooths); coefficients get smaller away from the centre of the mask.</li>
+</ul>
+
+<h3>Texture features</h3>
+<p><b>Texture</b> = spatial arrangement of colors or intensities; a set of <b>texels</b> in a regular or repeated pattern.</p>
+<h4>Statistical: edge density and direction</h4>
+<div class="f">F_edgeness = |{ p : |∇I(p)| ≥ threshold }| / N        F_magdir = (H_magnitude, H_direction)</div>
+<h4>Local Binary Pattern (LBP)</h4>
+<p>For each pixel p, visit its 8 neighbours clockwise from the top-left; bit = 0 if the neighbour ≤ p, otherwise 1. The texture is represented by the histogram of these 8-bit numbers.</p>
+<svg class="diag" viewBox="0 0 420 130" role="img" aria-label="LBP example: neighbourhood 100 101 103 / 40 50 80 / 50 60 90 gives bits 11111100">
+  <g font-family="JetBrains Mono, monospace" font-size="15" text-anchor="middle" fill="var(--fg)">
+    <g fill="var(--surface)" stroke="var(--muted)"><rect x="10" y="10" width="110" height="110"/></g>
+    <g stroke="var(--muted)"><line x1="46.7" y1="10" x2="46.7" y2="120"/><line x1="83.3" y1="10" x2="83.3" y2="120"/><line x1="10" y1="46.7" x2="120" y2="46.7"/><line x1="10" y1="83.3" x2="120" y2="83.3"/></g>
+    <text x="28" y="34">100</text><text x="65" y="34">101</text><text x="102" y="34">103</text>
+    <text x="28" y="70">40</text><text x="65" y="70" fill="var(--accent)" font-weight="600">50</text><text x="102" y="70">80</text>
+    <text x="28" y="107">50</text><text x="65" y="107">60</text><text x="102" y="107">90</text>
+    <g font-size="11" fill="var(--muted)"><text x="17" y="20">1</text><text x="54" y="20">2</text><text x="91" y="20">3</text><text x="91" y="56">4</text><text x="91" y="93">5</text><text x="54" y="93">6</text><text x="17" y="93">7</text><text x="17" y="56">8</text></g>
+    <text x="150" y="70" fill="var(--muted)">→</text>
+    <text x="290" y="58" font-size="18" fill="var(--accent)" font-weight="600">1 1 1 1 1 1 0 0</text>
+    <text x="290" y="84" font-size="12" fill="var(--muted)">b1 … b8 (centre = 50)</text>
+  </g>
+</svg>
+<div class="note"><b>Watch out:</b> the slide says "≤ gives 0", while question 47 of 114-1 picks "≥ gives 1". If that exact MCQ appears again, choose the key's answer (B); in a written answer, state your convention.</div>
+<h4>Co-occurrence matrix</h4>
+<p>C<sub>d</sub>(i, j) = number of pixel pairs (p, q) with q = p + d, I(p) = i, I(q) = j, where d = (drow, dcol). The matrix is L×L for L gray levels. N<sub>d</sub> = C<sub>d</sub> / sum.</p>
+<svg class="diag" viewBox="0 0 520 120" role="img" aria-label="Spatial relationships for d = (0,1), (1,1), (-1,1), (-1,-1)">
+  <g font-family="JetBrains Mono, monospace" font-size="14" text-anchor="middle">
+    <g transform="translate(10,20)"><rect x="0" y="0" width="34" height="34" fill="var(--accent-soft)" stroke="var(--muted)"/><rect x="34" y="0" width="34" height="34" fill="var(--warn-soft)" stroke="var(--muted)"/><text x="17" y="22" fill="var(--fg)">i</text><text x="51" y="22" fill="var(--fg)">j</text><text x="34" y="90" fill="var(--muted)">d=(0,1)</text></g>
+    <g transform="translate(140,10)"><rect x="0" y="0" width="34" height="34" fill="var(--accent-soft)" stroke="var(--muted)"/><rect x="34" y="34" width="34" height="34" fill="var(--warn-soft)" stroke="var(--muted)"/><text x="17" y="22" fill="var(--fg)">i</text><text x="51" y="56" fill="var(--fg)">j</text><text x="34" y="100" fill="var(--muted)">d=(1,1)</text></g>
+    <g transform="translate(270,10)"><rect x="34" y="0" width="34" height="34" fill="var(--warn-soft)" stroke="var(--muted)"/><rect x="0" y="34" width="34" height="34" fill="var(--accent-soft)" stroke="var(--muted)"/><text x="51" y="22" fill="var(--fg)">j</text><text x="17" y="56" fill="var(--fg)">i</text><text x="34" y="100" fill="var(--muted)">d=(−1,1)</text></g>
+    <g transform="translate(400,10)"><rect x="0" y="0" width="34" height="34" fill="var(--warn-soft)" stroke="var(--muted)"/><rect x="34" y="34" width="34" height="34" fill="var(--accent-soft)" stroke="var(--muted)"/><text x="17" y="22" fill="var(--fg)">j</text><text x="51" y="56" fill="var(--fg)">i</text><text x="34" y="100" fill="var(--muted)">d=(−1,−1)</text></g>
+  </g>
+</svg>
+<div class="f">Energy      = Σ N(i,j)²                  (uniformity)
+Entropy     = −Σ N(i,j) · log₂ N(i,j)
+Contrast    = Σ (i − j)² · N(i,j)
+Homogeneity = Σ N(i,j) / (1 + |i − j|)</div>
+<p>Slide example: a 6×4 image with d = (3, 1) has 3 × 3 = 9 pairs, C<sub>d</sub> = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>1</span><span>0</span><span>3</span><span>2</span><span>0</span><span>2</span><span>0</span><span>0</span><span>1</span></span>, N<sub>d</sub> = C<sub>d</sub>/9. How to choose d is still an open question (tiny, medium or large texels).</p>
+<h4>Laws' texture energy</h4>
+<ol><li>Filter the image with texture filters (2D masks = outer products of 1D masks L5 Level, E5 Edge, S5 Spot, R5 Ripple, e.g. E5L5).</li><li>Compute texture energy: sum the absolute filter responses in a neighbourhood around each pixel.</li><li>Combine symmetric pairs (e.g. E5L5 + L5E5) to achieve <b>rotational invariance</b>, giving 9 features.</li></ol>
+<h4>Gabor filters</h4>
+<p>Similar to Laws: wavelets at several frequencies (scales) and orientations, e.g. 4 scales × 8 orientations, or 5 × 8.</p>
+
+<h3>HoG (Histogram of Oriented Gradient)</h3>
+<p>Idea: local appearance and shape can be described by the distribution of gradients and their directions. Suited to object detection, especially human detection.</p>
+<ol><li>Gradient computation</li><li>Orientation binning: each pixel votes into a bin by its direction, optionally weighted by magnitude. Bin width = angle range / number of bins (360/9 = 40°, 180/9 = 20°, 360/4 = 90°)</li><li>Descriptor blocks &amp; block normalization</li><li>Similarity measure</li></ol>
+<p>Because it works on local cells, HoG is invariant to geometric and photometric transformations <i>except</i> object orientation.</p>
+
+<h3>PCA</h3>
+<div class="f">SD: s = √( Σ(xᵢ − x̄)² / (n − 1) )        variance = s²
+cov(X,Y) = Σ (xᵢ − x̄)(yᵢ − ȳ) / (n − 1)        cov(X,X) = var(X)
+d×d covariance matrix: diagonal = variance of each dimension</div>
+<ul><li>cov &gt; 0: both dimensions increase together. cov &lt; 0: one increases while the other decreases. cov = 0: independent (uncorrelated).</li></ul>
+<svg class="diag" viewBox="0 0 300 200" role="img" aria-label="PCA: data cloud with first and second principal axes">
+  <g fill="var(--muted)" opacity=".7">
+    <circle cx="70" cy="150" r="3"/><circle cx="90" cy="135" r="3"/><circle cx="100" cy="148" r="3"/><circle cx="115" cy="120" r="3"/><circle cx="130" cy="125" r="3"/><circle cx="140" cy="105" r="3"/><circle cx="155" cy="110" r="3"/><circle cx="165" cy="90" r="3"/><circle cx="180" cy="95" r="3"/><circle cx="195" cy="75" r="3"/><circle cx="210" cy="80" r="3"/><circle cx="225" cy="58" r="3"/><circle cx="120" cy="105" r="3"/><circle cx="175" cy="112" r="3"/>
+  </g>
+  <line x1="50" y1="170" x2="250" y2="40" stroke="var(--accent)" stroke-width="2.5"/>
+  <line x1="120" y1="70" x2="180" y2="140" stroke="var(--warn)" stroke-width="2"/>
+  <g font-family="JetBrains Mono, monospace" font-size="12"><text x="200" y="35" fill="var(--accent)">PC1 (largest λ)</text><text x="160" y="160" fill="var(--warn)">PC2</text></g>
+</svg>
+<h4>The 6 steps of PCA</h4>
+<ol><li>Get some data</li><li>Subtract the mean (DataAdjust)</li><li>Calculate the covariance matrix</li><li>Calculate the eigenvectors and eigenvalues of the covariance matrix</li><li>Choose components and form a feature vector: sort by λ descending, keep the first k. This is where the data is <b>compressed</b>.</li><li>Derive the new data: FinalData = RowFeatureVector × DataAdjust</li></ol>
+<div class="f">Choose k: cumsum(λ) / Σλ ≥ threshold (e.g. 90%, 95%, 98%)
+Recover: DataAdjust = RowFeatureVectorᵀ × FinalData   (unit eigenvectors, so inverse = transpose)
+         OriginalData = RowFeatureVectorᵀ × FinalData + OriginalMean</div>
+<p>Meaning: eigenvectors are the directions (axes) of the data distribution; eigenvalues are the importance (spread) along each axis. The principal axes are ordered by decreasing variance and are <b>uncorrelated</b> (covariance between any two axes = 0). Dropping eigenvectors loses the information on the lowest-variance axes.</p>
+<h4>Eigenface</h4>
+<ol><li>Training: n labelled images, each a d×1 vector. Compute the mean face m.</li><li>A = mean-subtracted images (d × n). C = AAᵀ/(n − 1), size d × d (30×30 images → 900×900, independent of the number of images).</li><li>Take the k eigenvectors with the k largest eigenvalues. These are the eigenfaces (a basis for face data).</li><li>Project the training images onto the k-dimensional eigenspace.</li><li>Testing: project the test image onto the eigenspace and classify with Nearest Neighbor.</li></ol>
+<div class="f">Each face is a linear combination of eigenfaces:  M = Σ aᵢ uᵢ ,   aᵢ = Mᵀ uᵢ  (projection coefficient, NOT an eigenvalue)
+SAD = Σ |xᵢ − pᵢ|      SSD = Σ (xᵢ − pᵢ)²</div>
+<p>Why NN: from the eigenface view, similar faces have similar linear combinations; from the PCA view, they have similar offsets along each axis. Face recognition challenges: complex background, illumination, head pose, expression, make-up/hair/moustache, skin colour, input clarity and resolution.</p>
+
+<h3>Harris Corner Detection</h3>
+<figure><img src="img/e22-001.png" alt="Flat region: no change in all directions; edge: no change along the edge direction; corner: significant change in all directions" loading="lazy"><figcaption>Flat, edge and corner (lecture figure, reproduced in the 2022 exam)</figcaption></figure>
+<p>Slide a small window. <b>Flat</b>: no change in any direction. <b>Edge</b>: no change when moving along the edge. <b>Corner</b>: significant change in all directions, so it is uniquely localized and the most stable feature for matching.</p>
+<figure class="fig-md"><img src="img/e22-002.png" alt="E(u,v) = sum of w(x,y)[I(x+u,y+v) - I(x,y)]^2 with window function, shifted intensity, intensity" loading="lazy"><figcaption>Change of intensity for the shift [u, v]</figcaption></figure>
+<div class="f">E(u,v) ≈ [u v] H [u v]ᵀ   (first-order Taylor expansion)
+H = Σ w(x,y) <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>Ix²</span><span>IxIy</span><span>IxIy</span><span>Iy²</span></span>   (structure tensor)
+R = det(H) − k·(trace H)² = λ₁λ₂ − k(λ₁+λ₂)²,   k = 0.04 – 0.06</div>
+<svg class="diag" viewBox="0 0 320 240" role="img" aria-label="Harris classification in the lambda1-lambda2 plane">
+  <rect x="40" y="10" width="270" height="200" fill="var(--surface)" stroke="var(--line)"/>
+  <path d="M40 210 L40 150 Q90 150 100 210 Z" fill="var(--accent-soft)"/>
+  <path d="M110 210 L310 210 L310 160 Q170 175 110 210 Z" fill="var(--warn-soft)"/>
+  <path d="M40 140 L40 10 L90 10 Q75 100 40 140 Z" fill="var(--warn-soft)"/>
+  <path d="M120 10 L310 10 L310 140 Q170 120 120 10 Z" fill="var(--ok-soft)"/>
+  <g stroke="var(--fg)" stroke-width="1.5"><line x1="40" y1="210" x2="310" y2="210"/><line x1="40" y1="210" x2="40" y2="10"/></g>
+  <g font-family="JetBrains Mono, monospace" font-size="12" fill="var(--fg)">
+    <text x="300" y="228" text-anchor="end">λ₁</text><text x="18" y="20">λ₂</text>
+    <text x="48" y="200">Flat</text><text x="44" y="190" font-size="10" fill="var(--muted)">|R| small</text>
+    <text x="230" y="200">Edge</text><text x="216" y="188" font-size="10" fill="var(--muted)">R &lt; 0</text>
+    <text x="45" y="60">Edge</text><text x="45" y="74" font-size="10" fill="var(--muted)">R &lt; 0</text>
+    <text x="210" y="60">Corner</text><text x="208" y="74" font-size="10" fill="var(--muted)">R &gt; 0</text>
+  </g>
+</svg>
+<div class="tbl"><table><tr><th>λ₁, λ₂</th><th>R</th><th>Region</th></tr><tr><td>both small</td><td>|R| small</td><td>Flat</td></tr><tr><td>λ₁ ≫ λ₂ (one large, one small)</td><td>R &lt; 0, |R| large</td><td>Edge</td></tr><tr><td>both large, similar</td><td>R &gt; 0 large</td><td>Corner</td></tr></table></div>
+<h4>The 6 steps</h4>
+<figure class="fig-md"><img src="img/e23-005.png" alt="Six steps of Harris corner detection" loading="lazy"><figcaption>Harris steps (as given in the 2023 reference answer)</figcaption></figure>
+
+<h3>SIFT</h3>
+<p>Invariant to scale, orientation and affine distortion; <b>partially invariant</b> to illumination. (David Lowe, ICCV 1999.)</p>
+<figure class="fig-md"><img src="img/e22-003.png" alt="Gaussian scale space and Difference of Gaussian pyramid" loading="lazy"><figcaption>Gaussian scale space and DoG (lecture figure, 2022 exam)</figcaption></figure>
+<svg class="diag" viewBox="0 0 360 150" role="img" aria-label="26 neighbours: 8 in the same scale, 9 in the scale above, 9 in the scale below">
+  <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="middle">
+    <g transform="translate(20,30)"><g fill="var(--surface)" stroke="var(--muted)"><rect width="75" height="75"/></g><g stroke="var(--line)"><line x1="25" y1="0" x2="25" y2="75"/><line x1="50" y1="0" x2="50" y2="75"/><line y1="25" x2="75" y2="25"/><line y1="50" x2="75" y2="50"/></g><rect width="75" height="75" fill="var(--accent)" opacity=".15"/><text x="37" y="95">scale above · 9</text></g>
+    <g transform="translate(140,30)"><g fill="var(--surface)" stroke="var(--muted)"><rect width="75" height="75"/></g><g stroke="var(--line)"><line x1="25" y1="0" x2="25" y2="75"/><line x1="50" y1="0" x2="50" y2="75"/><line y1="25" x2="75" y2="25"/><line y1="50" x2="75" y2="50"/></g><rect width="75" height="75" fill="var(--accent)" opacity=".15"/><rect x="25" y="25" width="25" height="25" fill="var(--warn)"/><text x="37" y="95">same scale · 8 + X</text></g>
+    <g transform="translate(260,30)"><g fill="var(--surface)" stroke="var(--muted)"><rect width="75" height="75"/></g><g stroke="var(--line)"><line x1="25" y1="0" x2="25" y2="75"/><line x1="50" y1="0" x2="50" y2="75"/><line y1="25" x2="75" y2="25"/><line y1="50" x2="75" y2="50"/></g><rect width="75" height="75" fill="var(--accent)" opacity=".15"/><text x="37" y="95">scale below · 9</text></g>
+    <text x="180" y="20" fill="var(--fg)" font-size="12">X is an extremum if larger/smaller than all 26 neighbours</text>
+  </g>
+</svg>
+<ol>
+<li><b>Scale-space extrema detection:</b> build the DoG pyramid. X is selected if it is larger or smaller than all <b>26 neighbours</b> (8 in the same scale + 9 above + 9 below). DoG = difference of two Gaussian-blurred images with different σ; computationally cheap; a <b>band-pass filter</b> that removes high frequencies (noise) and some low frequencies (homogeneous areas).</li>
+<li><b>Keypoint localization:</b> fit a Taylor expansion to find the accurate extremum x̂ = −(∂²D/∂x²)⁻¹ ∂D/∂x; discard low contrast |D(x̂)| &lt; 0.03. Eliminate edges: with λ<sub>max</sub> = r·λ<sub>min</sub>, if Tr(H)²/Det(H) &gt; (r+1)²/r with r = 10 (threshold 12.1), <b>discard</b>. Slide example: 832 → 729 → 536 keypoints.</li>
+<li><b>Orientation assignment:</b> gradient histogram with <b>36 bins</b>, weighted by magnitude × Gaussian window; the highest peak is the keypoint orientation.</li>
+<li><b>Keypoint descriptor:</b> 16 histograms (4×4 grid) of 8 bins each → <b>128</b>-dimensional vector.</li>
+</ol>
+
+<h3>Bag-of-Features, K-means, SPM</h3>
+<ol><li>Extract features (SIFT)</li><li>Learn the visual vocabulary with K-means clustering</li><li>Quantize features using the vocabulary</li><li>Represent each image by the frequencies of visual words (histogram)</li></ol>
+<div class="f">K-means: 1) initialize c₁..c_K   2) assign each point to the closest centre   3) update cᵢ = mean of points in the cluster   4) if any cᵢ changed, go to 2
+Objective: min Σᵢ Σ_{p∈cluster i} ‖p − cᵢ‖²   (SSE)</div>
+<p>K-means always converges, but possibly to a local minimum, because it depends on initialization. Compare results by SSE (sum of squared distances to the cluster centres): smaller SSE is better.</p>
+<p><b>Drawback of BoF:</b> it loses spatial information. <b>Spatial Pyramid Matching:</b> split the image into 2<sup>l</sup>×2<sup>l</sup> cells for l = 0, 1, 2 (1 + 4 + 16 = 21 cells), compute a BoF histogram in each cell, and concatenate.</p>
+<svg class="diag" viewBox="0 0 360 120" role="img" aria-label="Spatial pyramid levels 0, 1, 2 with 1, 4 and 16 cells">
+  <g fill="var(--surface)" stroke="var(--muted)"><rect x="20" y="10" width="80" height="80"/><rect x="140" y="10" width="80" height="80"/><rect x="260" y="10" width="80" height="80"/></g>
+  <g stroke="var(--muted)"><line x1="180" y1="10" x2="180" y2="90"/><line x1="140" y1="50" x2="220" y2="50"/><line x1="280" y1="10" x2="280" y2="90"/><line x1="300" y1="10" x2="300" y2="90"/><line x1="320" y1="10" x2="320" y2="90"/><line x1="260" y1="30" x2="340" y2="30"/><line x1="260" y1="50" x2="340" y2="50"/><line x1="260" y1="70" x2="340" y2="70"/></g>
+  <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="middle"><text x="60" y="108">l=0 · 1</text><text x="180" y="108">l=1 · 4</text><text x="300" y="108">l=2 · 16</text></g>
+</svg>
+
+<h2 id="c3">Unit 3 · Image Formation</h2>
+<figure><img src="img/e23-015.png" alt="Image formation: illumination source, scene element, imaging system, internal image plane, output digitized image" loading="lazy"><figcaption>The image formation process (lecture figure, 2023 exam)</figcaption></figure>
+<h3>The 4 physical parameters of image formation</h3>
+<div class="grid2">
+<div class="card"><h4>Geometric</h4>Type of projection (perspective, orthographic); camera pose (position and orientation).</div>
+<div class="card"><h4>Optical</h4>Lens type, focal length, field of view, aperture; distortion, depth of field, vignetting.</div>
+<div class="card"><h4>Photometric</h4>Type, direction and intensity of light reaching the sensor; surface reflectance (BRDF, Lambertian, specular, Phong).</div>
+<div class="card"><h4>Sensor</h4>Sampling: CCD/CMOS convert photons to electrons, Bayer filter, demosaicing, noise, compression.</div>
+</div>
+<p><b>The process:</b> a light source illuminates the scene; the surface reflects part of the light toward the camera (photometric). The imaging system (pinhole or lens) projects it onto the image plane (geometric + optical). The sensor samples and quantizes it into a digital image in pixel coordinates (sensor).</p>
+
+<h3>Pinhole camera</h3>
+<svg class="diag" viewBox="0 0 460 200" role="img" aria-label="Pinhole camera: object of height Y at distance Z projects through the centre of projection to an inverted image of height y at focal length f">
+  <line x1="20" y1="110" x2="440" y2="110" stroke="var(--line)" stroke-dasharray="4 4"/>
+  <line x1="300" y1="40" x2="300" y2="180" stroke="var(--fg)" stroke-width="3"/>
+  <line x1="400" y1="40" x2="400" y2="180" stroke="var(--accent)" stroke-width="2"/>
+  <line x1="60" y1="110" x2="60" y2="40" stroke="var(--warn)" stroke-width="3"/>
+  <line x1="60" y1="40" x2="400" y2="152" stroke="var(--muted)"/>
+  <line x1="400" y1="110" x2="400" y2="152" stroke="var(--warn)" stroke-width="3"/>
+  <circle cx="300" cy="110" r="4" fill="var(--fg)"/>
+  <g font-family="JetBrains Mono, monospace" font-size="12" fill="var(--fg)">
+    <text x="66" y="80">Y</text><text x="408" y="136">y (inverted)</text>
+    <text x="268" y="130">COP</text><text x="380" y="34" fill="var(--accent)">image plane</text>
+    <text x="170" y="128">Z</text><text x="345" y="128">f</text>
+    <text x="40" y="195" fill="var(--muted)">y = f · Y / Z   (similar triangles)</text>
+  </g>
+</svg>
+<ul><li>Film placed in front of an object gives a blurred image. A barrier with a small opening (the aperture) reduces blur; the image is inverted.</li><li>All rays pass through one point, the <b>Center of Projection (COP)</b>; the image forms on the <b>image plane</b>; the effective focal length f is the distance from the COP to the image plane.</li><li>Smaller pinhole: sharper but dimmer image.</li><li>The human eye: the iris controls the pupil (the aperture); the "film" is the retina (rods and cones).</li></ul>
+
+<h3>4 coordinate systems and the transformation chain</h3>
+<svg class="diag" viewBox="0 0 620 90" role="img" aria-label="World coordinates to camera coordinates by R and T, to film coordinates by projection, to pixel coordinates by K">
+  <g font-family="Be Vietnam Pro, sans-serif" font-size="13" text-anchor="middle">
+    <g fill="var(--surface)" stroke="var(--muted)"><rect x="5" y="20" width="110" height="40" rx="6"/><rect x="170" y="20" width="110" height="40" rx="6"/><rect x="335" y="20" width="110" height="40" rx="6"/><rect x="500" y="20" width="110" height="40" rx="6"/></g>
+    <g fill="var(--fg)" font-weight="600"><text x="60" y="45">World (3D)</text><text x="225" y="45">Camera (3D)</text><text x="390" y="45">Film (2D, mm)</text><text x="555" y="45">Pixel (2D)</text></g>
+    <g stroke="var(--accent)" stroke-width="2"><line x1="117" y1="40" x2="166" y2="40"/><line x1="282" y1="40" x2="331" y2="40"/><line x1="447" y1="40" x2="496" y2="40"/></g>
+    <g fill="var(--accent)" font-family="JetBrains Mono, monospace" font-size="11"><text x="142" y="15">R, T</text><text x="306" y="15">Π (÷Z)</text><text x="472" y="15">K</text><text x="142" y="80">extrinsic</text><text x="306" y="80">projection</text><text x="472" y="80">intrinsic</text></g>
+  </g>
+</svg>
+<div class="tbl"><table><tr><th>System</th><th>Meaning</th><th>To the next system</th></tr>
+<tr><td>World</td><td>The original 3D frame of the scene, chosen freely</td><td>Extrinsic: rotation R, translation T</td></tr>
+<tr><td>Camera</td><td>3D, origin at the camera's COP, Z along the optical axis</td><td>Perspective projection (divide by Z)</td></tr>
+<tr><td>Film / Image</td><td>2D on the image plane, physical units (mm)</td><td>Intrinsic K: unit scaling, principal-point offset, skew</td></tr>
+<tr><td>Pixel</td><td>2D in pixels of the digital image (e.g. 200×300)</td><td>—</td></tr></table></div>
+<div class="f">Perspective: x = f·X/Z,  y = f·Y/Z   (division is nonlinear → use homogeneous coordinates)
+3D homogeneous: (X, Y, Z, 1)      2D: (x, y, 1) ~ (wx, wy, w), then divide by the last coordinate
+
+<span class="mat" style="grid-template-columns:repeat(1,auto)"><span>x</span><span>y</span><span>1</span></span> ~ <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>fx</span><span>s</span><span>cx</span><span>0</span><span>fy</span><span>cy</span><span>0</span><span>0</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(4,auto)"><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>0</span></span> <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>R₃ₓ₃</span><span>0₃ₓ₁</span><span>0₁ₓ₃</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>I₃ₓ₃</span><span>T₃ₓ₁</span><span>0₁ₓ₃</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>X</span><span>Y</span><span>Z</span><span>1</span></span>
+         intrinsics K         projection            rotation             translation
+⇒  x = K [R | T] X = P X ,   P is 3×4</div>
+<ul><li><b>T</b> moves the world origin to the camera position and <b>R</b> rotates the world axes onto the camera axes; together they take world to camera coordinates (extrinsic, 6 DoF). The 3×4 <b>projection</b> drops the 4th coordinate, projecting 3D onto 2D. <b>K</b> converts film coordinates to pixels.</li>
+<li>K is <b>upper triangular</b>. (c<sub>x</sub>, c<sub>y</sub>): principal point; f<sub>x</sub>, f<sub>y</sub>: pixels per unit length; s: skew (usually 0, needed when the pixel axes are not perpendicular); f<sub>y</sub>/f<sub>x</sub>: aspect ratio.</li>
+<li>Multiplying P by a scalar D leaves the image coordinates unchanged (up to scale).</li>
+<li>A rotation matrix is orthogonal: R⁻¹ = Rᵀ. R<sub>z</sub>(θ) = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>cosθ</span><span>−sinθ</span><span>0</span><span>sinθ</span><span>cosθ</span><span>0</span><span>0</span><span>0</span><span>1</span></span>.</li></ul>
+
+<h3>Finding the projection matrix P from n pairs</h3>
+<div class="f">xᵢ = (P11Xᵢ + P12Yᵢ + P13Zᵢ + P14) / (P31Xᵢ + P32Yᵢ + P33Zᵢ + P34)
+yᵢ = (P21Xᵢ + P22Yᵢ + P23Zᵢ + P24) / (P31Xᵢ + P32Yᵢ + P33Zᵢ + P34)
+Cross-multiply and move to one side:
+P11Xᵢ + P12Yᵢ + P13Zᵢ + P14 − P31xᵢXᵢ − P32xᵢYᵢ − P33xᵢZᵢ − P34xᵢ = 0
+P21Xᵢ + P22Yᵢ + P23Zᵢ + P24 − P31yᵢXᵢ − P32yᵢYᵢ − P33yᵢZᵢ − P34yᵢ = 0
+
+Each pair gives 2 rows:  [Xᵢ Yᵢ Zᵢ 1  0 0 0 0  −xᵢXᵢ −xᵢYᵢ −xᵢZᵢ −xᵢ]
+                         [0 0 0 0  Xᵢ Yᵢ Zᵢ 1  −yᵢXᵢ −yᵢYᵢ −yᵢZᵢ −yᵢ]
+⇒ A P = 0,  A: 2N×12,  P: 12×1  (N = 200 ⇒ A is 400×12)
+min ‖AP‖² = min PᵀAᵀAP  subject to ‖P‖ = 1
+AᵀA is symmetric positive semi-definite. If P = Vᵢ (unit eigenvector), PᵀAᵀAP = λᵢ
+⇒ choose P = eigenvector of AᵀA with the SMALLEST eigenvalue</div>
+<p>P has 12 entries but is defined up to scale, so it has 11 DoF and needs at least 6 point pairs. Evaluate with projection error = (1/N) Σ ‖x<sub>gt</sub> − PX<sub>i</sub>‖².</p>
+<h4>Decomposing P into K, R, T</h4>
+<div class="f">P = K[R | T] = [KR | KT] = [M | P₄],   M = KR (3×3),  P₄ = KT (3×1)
+K upper triangular, R orthogonal ⇒ QR decomposition (Q orthogonal, R upper triangular) of M⁻¹:
+M⁻¹ = Q·R_qr   ⇒  M = R_qr⁻¹ · Q⁻¹   ⇒  K = R_qr⁻¹ ,  R = Q⁻¹ = Qᵀ
+T = K⁻¹ P₄</div>
+<p>The inverse of an upper-triangular matrix is still upper triangular and the inverse of an orthogonal matrix is still orthogonal, so the factors have exactly the K·R form.</p>
+
+<h3>Projection properties</h3>
+<ul><li>Many-to-one: all points along the same ray map to the same image point.</li><li>Points map to points; lines map to lines (collinearity preserved). Distances and angles are <b>not</b> preserved.</li><li>Parallel lines meet at a <b>vanishing point</b>; vanishing points lie on the horizon line. Far objects look smaller.</li><li>Degenerate cases: a line through the COP projects to a point; a plane through the COP projects to a line.</li><li><b>Orthographic</b> (parallel) projection: distance from COP to the image plane is infinite, (X, Y, Z) → (X, Y); good approximation for telephoto / telecentric lenses.</li><li><b>Weak perspective:</b> when object depth is small compared with its distance, treat all points as at depth Z₀: x = (f/Z₀)·X.</li><li><b>Object-centered projection:</b> when t<sub>z</sub> ≫ ‖p‖, the projected scale depends only on f/t<sub>z</sub>, so a zoom change is hard to tell from motion toward the camera.</li></ul>
+
+<h3>Homography &amp; Mosaics</h3>
+<p>For a planar scene (Z = 0), drop the 3rd column of P to get a 3×3 H:</p>
+<div class="f"><span class="mat" style="grid-template-columns:repeat(1,auto)"><span>x</span><span>y</span><span>1</span></span> ~ <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>H11</span><span>H12</span><span>H13</span><span>H21</span><span>H22</span><span>H23</span><span>H31</span><span>H32</span><span>H33</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>X</span><span>Y</span><span>1</span></span>     x₁ = H x₀  (instead of x₁ = P₁P₀⁻¹x₀ = M₁₀x₀)
+H is defined up to scale ⇒ set H33 = 1 ⇒ 8 unknowns ⇒ 4 point pairs are enough</div>
+<p><b>Homography conditions</b> (independent of scene structure):</p>
+<ol><li>Both images view the same <b>plane</b> from different angles.</li><li>Both images are taken from the same camera (same position) at different angles.</li><li>The camera is <b>rotated about its COP</b> without any translation.</li></ol>
+<svg class="diag" viewBox="0 0 420 170" role="img" aria-label="Camera rotating about its centre of projection: two image planes overlapping, related by a homography H">
+  <circle cx="210" cy="150" r="5" fill="var(--fg)"/>
+  <g stroke="var(--muted)" stroke-dasharray="3 3"><line x1="210" y1="150" x2="80" y2="30"/><line x1="210" y1="150" x2="200" y2="20"/><line x1="210" y1="150" x2="230" y2="20"/><line x1="210" y1="150" x2="345" y2="35"/></g>
+  <line x1="70" y1="60" x2="230" y2="35" stroke="var(--accent)" stroke-width="3"/>
+  <line x1="190" y1="35" x2="350" y2="60" stroke="var(--warn)" stroke-width="3"/>
+  <g font-family="JetBrains Mono, monospace" font-size="12"><text x="60" y="80" fill="var(--accent)">image 1</text><text x="310" y="80" fill="var(--warn)">image 2</text><text x="225" y="160" fill="var(--fg)">COP (fixed)</text><text x="175" y="70" fill="var(--fg)">overlap → x₂ = H x₁</text></g>
+</svg>
+<p>If the camera also translates, the mapping is in general no longer a homography, except for regions on the same plane (each plane has its own homography).</p>
+<p><b>Mosaics:</b> stitch overlapping images into one large image (a panorama). Method: detect features (e.g. SIFT), match corresponding points between the left and right images, solve for H, warp all images into one coordinate system. Data acquisition requirements: images must <b>overlap</b>; the camera rotates in place (same COP) or the scene is planar; at least 4 corresponding pairs, no 3 collinear.</p>
+<div class="f">x₀ = (H11x₁ + H12y₁ + H13)/(H31x₁ + H32y₁ + 1),   y₀ = (H21x₁ + H22y₁ + H23)/(H31x₁ + H32y₁ + 1)
+⇒ H11x₁ + H12y₁ + H13 − H31x₁x₀ − H32y₁x₀ = x₀
+   H21x₁ + H22y₁ + H23 − H31x₁y₀ − H32y₁y₀ = y₀
+<span class="mat" style="grid-template-columns:repeat(8,auto)"><span>x₁</span><span>y₁</span><span>1</span><span>0</span><span>0</span><span>0</span><span>−x₀x₁</span><span>−x₀y₁</span><span>0</span><span>0</span><span>0</span><span>x₁</span><span>y₁</span><span>1</span><span>−y₀x₁</span><span>−y₀y₁</span><span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>H11</span><span>H12</span><span>⋮</span><span>H32</span></span> = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>x₀</span><span>y₀</span><span>⋮</span><span>⋮</span></span>    (2N×8, solve Ah = b by least squares)</div>
+<p>Applications of homography: mosaics (image–image), removing perspective distortion (image–scene), rendering textures (scene–image).</p>
+
+<h3>Camera calibration (planar pattern)</h3>
+<ul><li>Use a planar object (chessboard) and take 15–20 images. Because it is planar, each image has a homography H = [h₁ h₂ h₃] = λK[r₁ r₂ t].</li><li>r₁ = K⁻¹h₁, r₂ = K⁻¹h₂. R is orthonormal, which gives 2 constraints: <b>r₁ᵀr₂ = 0</b> and <b>r₁ᵀr₁ = r₂ᵀr₂</b>.</li><li>Let B = K⁻ᵀK⁻¹ (symmetric, 6 unknowns): h₁ᵀBh₂ = 0, h₁ᵀBh₁ − h₂ᵀBh₂ = 0. N images give Vb = 0 with V of size 2N×6. b is the eigenvector of VᵀV with the smallest λ; then recover K.</li></ul>
+
+<h3>Optics</h3>
+<ul><li>A lens focuses parallel rays to the focal point, gathering more light while keeping focus. <b>Thin lens:</b> 1/f = 1/u + 1/v (u object distance, v image distance).</li><li><b>Radial distortion</b> comes from imperfect lenses and is strongest at the edges: <i>barrel</i> (displaced away from the centre) and <i>pincushion</i> (toward the centre). Model: x̂ = x(1 + κ₁r² + κ₂r⁴).</li><li><b>Depth of field:</b> the range of depths that look acceptably sharp. Smaller aperture → larger DoF; larger aperture → smaller DoF (blurry background).</li><li><b>Field of view:</b> smaller f → wider angle; larger f → narrower (telescopic).</li><li><b>Vignetting:</b> reduced brightness or saturation at the periphery compared with the centre.</li></ul>
+<svg class="diag" viewBox="0 0 420 140" role="img" aria-label="Radial distortion: no distortion, pincushion, barrel">
+  <g fill="none" stroke="var(--accent)" stroke-width="1.5">
+    <g transform="translate(20,15)"><path d="M0 0H100V100H0Z M33 0V100 M67 0V100 M0 33H100 M0 67H100"/></g>
+    <g transform="translate(160,15)"><path d="M0 0Q50 25 100 0Q75 50 100 100Q50 75 0 100Q25 50 0 0Z M33 6Q40 50 33 94 M67 6Q60 50 67 94 M6 33Q50 40 94 33 M6 67Q50 60 94 67"/></g>
+    <g transform="translate(300,15)"><path d="M0 0Q50 -15 100 0Q115 50 100 100Q50 115 0 100Q-15 50 0 0Z M33 -4Q28 50 33 104 M67 -4Q72 50 67 104 M-4 33Q50 28 104 33 M-4 67Q50 72 104 67"/></g>
+  </g>
+  <g font-family="JetBrains Mono, monospace" font-size="12" fill="var(--muted)" text-anchor="middle"><text x="70" y="134">no distortion</text><text x="210" y="134">pincushion</text><text x="350" y="134">barrel</text></g>
+</svg>
+<h3>Photometric</h3>
+<ul><li><b>BRDF</b> (Bidirectional Reflectance Distribution Function): how much of each wavelength arriving from incident direction vᵢ is emitted in reflected direction v<sub>r</sub>.</li><li><b>Diffuse / Lambertian:</b> scatters light uniformly in all directions; constant BRDF; shading depends on max(0, n·l) (matte surfaces such as a statue).</li><li><b>Specular:</b> mirror-like reflection, depends on the viewing direction.</li><li><b>Phong shading</b> = ambient + diffuse + specular.</li></ul>
+<h3>Sensor</h3>
+<ul><li>A digital camera replaces film with a sensor array of <b>CCD</b> or <b>CMOS</b> cells that convert photons to electrons.</li><li><b>Bayer grid:</b> each pixel records only one colour channel (50% G, 25% R, 25% B); <b>demosaicing</b> estimates the missing channels from neighbours.</li><li>Issues: noise (especially in low light), compression artifacts, colour fringing, blooming (charge overflowing into neighbouring pixels), oversharpening halos, interlaced scan, more megapixels need better lenses, stabilization.</li></ul>
+<svg class="diag" viewBox="0 0 160 160" role="img" aria-label="Bayer colour filter array pattern: alternating G R and B G">
+  <g font-family="JetBrains Mono, monospace" font-size="13" text-anchor="middle" font-weight="600" id="bayer"></g>
+  <g stroke="var(--surface)" stroke-width="2">
+    <rect x="0" y="0" width="40" height="40" fill="#3f9b52"/><rect x="40" y="0" width="40" height="40" fill="#c8453b"/><rect x="80" y="0" width="40" height="40" fill="#3f9b52"/><rect x="120" y="0" width="40" height="40" fill="#c8453b"/>
+    <rect x="0" y="40" width="40" height="40" fill="#3a63c4"/><rect x="40" y="40" width="40" height="40" fill="#3f9b52"/><rect x="80" y="40" width="40" height="40" fill="#3a63c4"/><rect x="120" y="40" width="40" height="40" fill="#3f9b52"/>
+    <rect x="0" y="80" width="40" height="40" fill="#3f9b52"/><rect x="40" y="80" width="40" height="40" fill="#c8453b"/><rect x="80" y="80" width="40" height="40" fill="#3f9b52"/><rect x="120" y="80" width="40" height="40" fill="#c8453b"/>
+    <rect x="0" y="120" width="40" height="40" fill="#3a63c4"/><rect x="40" y="120" width="40" height="40" fill="#3f9b52"/><rect x="80" y="120" width="40" height="40" fill="#3a63c4"/><rect x="120" y="120" width="40" height="40" fill="#3f9b52"/>
+  </g>
+</svg>
+
+<h2 id="c4">Unit 4 · 3D Vision &amp; Epipolar Geometry</h2>
+<p><b>Stereo:</b> recover 3D by <b>triangulation</b>, the intersection of two rays. It requires calibration and point correspondence. The key question: given p in the left image, where can the corresponding p′ be in the right image?</p>
+<div class="slides">
+  <figure><img src="img/c4-2.jpg" alt="Stereo (two view): scene point, image plane, optical center" loading="lazy"><figcaption>Unit 4, slide 2</figcaption></figure>
+  <figure><img src="img/c4-3.jpg" alt="Stereo: basic principle triangulation" loading="lazy"><figcaption>Unit 4, slide 3</figcaption></figure>
+</div>
+<div class="grid2">
+<div class="card"><h4>Baseline</h4>The line joining the two optical centres O and O′.</div>
+<div class="card"><h4>Epipolar plane</h4>The plane through the 3D point P and the baseline.</div>
+<div class="card"><h4>Epipolar lines</h4>Where the epipolar plane intersects the two image planes.</div>
+<div class="card"><h4>Epipoles e, e′</h4>Where the baseline intersects each image plane; equivalently, the image of the other camera's centre. Every epipolar line passes through the epipole.</div>
+</div>
+<div class="slides">
+  <figure><img src="img/c4-5.jpg" alt="Epipolar geometry definitions slide" loading="lazy"><figcaption>Unit 4, slide 5 · definitions</figcaption></figure>
+  <figure><img src="img/c4-6.jpg" alt="Epipolar constraints: corresponding points must lie on epipolar lines" loading="lazy"><figcaption>Unit 4, slide 6 · epipolar constraint</figcaption></figure>
+  <figure><img src="img/c4-7.jpg" alt="Point correspondence geometry" loading="lazy"><figcaption>Unit 4, slide 7</figcaption></figure>
+  <figure><img src="img/c4-8.jpg" alt="Epipolar geometry: baseline, epipolar pencil" loading="lazy"><figcaption>Unit 4, slide 8 · epipolar pencil</figcaption></figure>
+</div>
+<p><b>Epipolar constraint:</b> the match of p must lie on the epipolar line l′ (and vice versa). Reason: every 3D point M on the ray O→p projects to p in the left image, but in the right image these points move along exactly one line, the intersection of the plane (O, O′, p) with the right image plane. So the correspondence search is 1D (along a line) instead of 2D. As P varies, the epipolar planes "rotate" about the baseline, forming an <b>epipolar pencil</b>.</p>
+
+<h3>From geometry to algebra</h3>
+<div class="slides">
+  <figure><img src="img/c4-9.jpg" alt="From geometry to algebra: P, p, p', O, O'" loading="lazy"><figcaption>Unit 4, slide 9</figcaption></figure>
+  <figure><img src="img/c4-10.jpg" alt="The epipolar constraint: these vectors are coplanar" loading="lazy"><figcaption>Unit 4, slide 10 · coplanarity</figcaption></figure>
+  <figure><img src="img/c4-13.jpg" alt="Cross product example" loading="lazy"><figcaption>Unit 4, slide 13 · cross product</figcaption></figure>
+  <figure><img src="img/c4-14.jpg" alt="Matrix form of cross product" loading="lazy"><figcaption>Unit 4, slide 14 · [a]ₓ</figcaption></figure>
+  <figure><img src="img/c4-17.jpg" alt="Algebraic derivation" loading="lazy"><figcaption>Unit 4, slide 17</figcaption></figure>
+  <figure><img src="img/c4-18.jpg" alt="Matrix form p^T E p' = 0" loading="lazy"><figcaption>Unit 4, slide 18</figcaption></figure>
+</div>
+<div class="f">Cross product in matrix form:  a × b = [a]ₓ b,   [a]ₓ = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>−a_z</span><span>a_y</span><span>a_z</span><span>0</span><span>−a_x</span><span>−a_y</span><span>a_x</span><span>0</span></span>
+a × b is perpendicular to both a and b;   a · b = 0 ⇔ a ⊥ b
+
+Op, O′p′ and OO′ are coplanar:   Op · [ OO′ × O′p′ ] = 0
+In the left camera frame:  p · [ t × (R p′) ] = 0   ⇒   pᵀ [t]ₓ R p′ = 0
+⇒  pᵀ E p′ = 0 ,   E = [t]ₓ R   (Essential matrix, normalized coordinates p̂ = K⁻¹p)</div>
+<div class="slides">
+  <figure><img src="img/c4-20.jpg" alt="The essential matrix" loading="lazy"><figcaption>Unit 4, slide 20 · essential matrix</figcaption></figure>
+  <figure><img src="img/c4-21.jpg" alt="Epipolar line from the essential matrix" loading="lazy"><figcaption>Unit 4, slide 21 · epipolar line</figcaption></figure>
+  <figure><img src="img/c4-22.jpg" alt="Epipole" loading="lazy"><figcaption>Unit 4, slide 22 · epipole</figcaption></figure>
+  <figure><img src="img/c4-23.jpg" alt="Fundamental matrix when calibration is unknown" loading="lazy"><figcaption>Unit 4, slide 23 · fundamental matrix</figcaption></figure>
+  <figure><img src="img/c4-24.jpg" alt="The essential matrix has five degrees of freedom" loading="lazy"><figcaption>Unit 4, slide 24</figcaption></figure>
+  <figure><img src="img/c4-25.jpg" alt="Properties of the fundamental matrix" loading="lazy"><figcaption>Unit 4, slide 25 · F properties</figcaption></figure>
+</div>
+<div class="tbl"><table><tr><th></th><th>Essential matrix E</th><th>Fundamental matrix F</th></tr>
+<tr><td>Used when</td><td>Cameras calibrated (K known), normalized coordinates</td><td>K unknown, pixel coordinates</td></tr>
+<tr><td>Formula</td><td>E = [t]ₓR,  p̂ᵀE p̂′ = 0</td><td>F = K⁻ᵀ E K′⁻¹,  pᵀF p′ = 0</td></tr>
+<tr><td>DoF</td><td>5 (R: 3, t: 3, minus 1 for scale)</td><td>7 (rank 2, homogeneous)</td></tr>
+<tr><td>Epipolar lines</td><td>E p′ is the line in the left image; Eᵀp is the line in the right image</td><td>F p′ in the left image; Fᵀp in the right image</td></tr>
+<tr><td>Epipoles</td><td>Eᵀe = 0, E e′ = 0 (e ∝ t, e′ ∝ −Rᵀt)</td><td>Fᵀe = 0, F e′ = 0</td></tr></table></div>
+<div class="note"><b>Two conventions:</b> slides 20–23 write pᵀE p′ = 0 (p in the left image). Slide 25 follows Hartley &amp; Zisserman: x′ᵀF x = 0, so l′ = Fx, l = Fᵀx′, Fe = 0, Fᵀe′ = 0. In an exam answer, say which convention you use. A line l = (a, b, c) contains p = (u, v, 1) when au + bv + c = 0, i.e. pᵀl = 0.</div>
+<h3>The 8-point algorithm</h3>
+<div class="slides">
+  <figure><img src="img/c4-26.jpg" alt="The 8-point algorithm: linear equation per correspondence" loading="lazy"><figcaption>Unit 4, slide 26</figcaption></figure>
+  <figure><img src="img/c4-27.jpg" alt="The 8-point algorithm: 8 equations" loading="lazy"><figcaption>Unit 4, slide 27</figcaption></figure>
+  <figure><img src="img/c4-28.jpg" alt="Matrix form of least square solution" loading="lazy"><figcaption>Unit 4, slide 28 · least squares</figcaption></figure>
+</div>
+<div class="f">Each pair (u,v) ↔ (u′,v′):  [u v 1] F [u′ v′ 1]ᵀ = 0
+⇒ [uu′  uv′  u  vu′  vv′  v  u′  v′  1] · [F11 F12 F13 F21 F22 F23 F31 F32 F33]ᵀ = 0
+≥ 8 pairs ⇒ A f = 0 ⇒ f = eigenvector of AᵀA with the smallest λ (SVD), then enforce rank(F) = 2
+(In principle 7 pairs suffice since F has 7 DoF; the simple linear method needs 8.)
+Least squares for y = Xβ + ε:  β̂ = (XᵀX)⁻¹ Xᵀ y</div>
+<h3>Motion cases</h3>
+<div class="slides s3">
+  <figure><img src="img/c4-29.jpg" alt="Example: converging cameras" loading="lazy"><figcaption>Converging cameras</figcaption></figure>
+  <figure><img src="img/c4-30.jpg" alt="Example: motion parallel with image plane" loading="lazy"><figcaption>Motion parallel to the image plane</figcaption></figure>
+  <figure><img src="img/c4-31.jpg" alt="Example: forward motion" loading="lazy"><figcaption>Forward motion</figcaption></figure>
+</div>
+<ul><li><b>Converging cameras:</b> epipolar lines converge to an epipole inside or near the image.</li><li><b>Motion parallel with the image plane:</b> epipolar lines are parallel; the epipole is at infinity.</li><li><b>Forward motion:</b> the epipole is in the middle of the image (focus of expansion) and epipolar lines radiate from it; e and e′ coincide.</li></ul>
+<div class="f">Rectified (parallel) stereo:  depth  Z = f · B / d    (B baseline, d disparity)
+Example: f = 800 px, B = 0.1 m, d = 40 px ⇒ Z = 2.0 m</div>
+</section>
+
+<!-- ===================== 2022 ===================== -->
+<section class="view" id="v-exam-2022" hidden>
+<h2>2022 Midterm Solutions</h2>
+<p>Each answer was recomputed and checked against the reference answer in the exam file. Where the reference is wrong or incomplete, there is a separate note.</p>
+
+<div class="q"><h3>Q1. Definition, applications, challenges <span class="pts">10%</span></h3>
+<p>a) Methods to acquire, process and analyze images and videos so that computers understand the real world and extract useful numerical or symbolic information.<br>b) Face detection, action recognition, image classification, 3D reconstruction, gesture recognition.<br>c) View point variation, illumination, occlusion, scale, deformation (also: background clutter, intra-class variation).</p></div>
+
+<div class="q"><h3>Q2. Texture / shape / color features and co-occurrence <span class="pts">12%</span></h3>
+<p>a) LBP, Gabor filters, co-occurrence matrix (or Laws). b) HoG. c) RGB (color) histogram.</p>
+<figure class="fig-sm"><img src="img/e22-000.png" alt="4x5 gray scale image: 1 1 0 0 0 / 1 1 3 0 3 / 0 0 2 2 0 / 0 0 2 2 1" loading="lazy"><figcaption>The 4×5 image given in the exam</figcaption></figure>
+<p>d) d = (−1, 1): j is <b>one row up and one column right</b> of i.</p>
+<p>Number of pairs = (4 − 1) × (5 − 1) = 12. Visit i in rows 1–3, columns 0–3, and read j at (r − 1, c + 1):</p>
+<div class="f">C_d (rows i = 0..3, columns j = 0..3) = <span class="mat" style="grid-template-columns:repeat(4,auto)"><span>2</span><span>1</span><span>1</span><span>1</span><span>1</span><span>1</span><span>0</span><span>0</span><span>2</span><span>0</span><span>1</span><span>1</span><span>1</span><span>0</span><span>0</span><span>0</span></span>     sum = 12
+N_d = C_d / 12</div>
+<p>Matches the reference answer.</p></div>
+
+<div class="q"><h3>Q3. Harris corner <span class="pts">5%</span></h3>
+<figure><img src="img/e22-001.png" alt="Flat, edge, corner windows" loading="lazy"><figcaption>Figure used in the reference answer</figcaption></figure>
+<p>a) Matching needs points that can be localized uniquely. In a flat region, shifting the window in any direction changes nothing. On an edge, shifting along the edge changes nothing, so the point can "slide" along it. Only at a corner does the content change strongly in all directions, so its position is stable and unique.</p>
+<p>b) Compute E(u,v) ≈ [u v] H [u v]ᵀ with the structure tensor H and look at its eigenvalues, or at R = det H − k(trace H)²: both λ small (|R| small) → flat; one large, one small (R &lt; 0) → edge; both large (R &gt; 0 large) → corner.</p></div>
+
+<div class="q"><h3>Q4. DoG and SIFT <span class="pts">6%</span></h3>
+<figure class="fig-md"><img src="img/e22-003.png" alt="Gaussian and DoG pyramid" loading="lazy"><figcaption>DoG pyramid (from the reference answer)</figcaption></figure>
+<p>a) DoG is the difference of two Gaussian-filtered images with different σ (e.g. σ and kσ): D(x,y,σ) = L(x,y,kσ) − L(x,y,σ). It is a band-pass filter approximating the Laplacian-of-Gaussian and is cheap to compute.<br>b) Build a 36-bin gradient-orientation histogram around the keypoint (weighted by magnitude × Gaussian window) and take the highest peak as its orientation.<br>c) <b>Detection:</b> find extrema in the DoG pyramid (compared with 26 neighbours), refine the location with a Taylor expansion, discard low contrast (|D| &lt; 0.03), discard edge points (curvature ratio, r = 10). <b>Representation:</b> assign the orientation, split the region around the keypoint into 4×4 cells, each with an 8-direction histogram, giving a 128-D vector (rotated to the dominant orientation, so rotation invariant).</p></div>
+
+<div class="q"><h3>Q5. PCA <span class="pts">12%</span></h3>
+<p>x₁ = (0, 2, 1), x₂ = (1, 1, 6), x₃ = (2, 0, 2).</p>
+<p>a) The eigenvectors of the covariance matrix are the directions of the data distribution (principal axes); the eigenvalues give the spread (importance) along each axis.</p>
+<div class="f">b) mean = (1, 1, 3)
+   y₁ = (−1, 1, −2),  y₂ = (0, 0, 3),  y₃ = (1, −1, −1)
+   C = (1/(3−1)) Σ yᵢyᵢᵀ = ½ <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>2</span><span>−2</span><span>1</span><span>−2</span><span>2</span><span>−1</span><span>1</span><span>−1</span><span>14</span></span> = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>1</span><span>−1</span><span>0.5</span><span>−1</span><span>1</span><span>−0.5</span><span>0.5</span><span>−0.5</span><span>7</span></span>
+
+c) λ₃ = 0.54, λ₁ = 0.37, λ₂ = 0.09 (sum 1.00)
+   Keep the two largest: (0.54 + 0.37)/1.00 = 91% ≈ 90%
+   RowFeatureVector = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>v₃ᵀ</span><span>v₁ᵀ</span></span> = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>4</span><span>2</span><span>6</span><span>1</span><span>0</span><span>1</span></span>
+   x̂₁ = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>4</span><span>2</span><span>6</span><span>1</span><span>0</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>−1</span><span>1</span><span>−2</span></span> = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>−14</span><span>−3</span></span>     x̂₂ = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>18</span><span>3</span></span>     x̂₃ = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>−4</span><span>0</span></span></div>
+<div class="note"><b>Note:</b> the eigenvectors/eigenvalues in the question are given values (not the true eigen-decomposition of C). The reference answer uses the unnormalized vectors as above. Strictly, they should be normalized (‖v₃‖ = √56, ‖v₁‖ = √2); add one line saying you keep the vectors as given.</div>
+<p>d) Training: use labelled faces, compute the mean and C, keep the k largest eigenvectors as eigenfaces, project the training images onto the eigenspace. Testing: subtract the mean, project the test image onto the eigenspace, use Nearest Neighbor (SAD/SSD) to find the closest training image and assign its label.</p></div>
+
+<div class="q"><h3>Q6. Coordinate systems and the matrix chain <span class="pts">12%</span></h3>
+<p>a) See the table of the 4 coordinate systems in the Theory tab.</p>
+<div class="f">b) pixel = K · Π · R · T · world
+<span class="mat" style="grid-template-columns:repeat(1,auto)"><span>x</span><span>y</span><span>1</span></span> ~ <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>fx</span><span>s</span><span>cx</span><span>0</span><span>fy</span><span>cy</span><span>0</span><span>0</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(4,auto)"><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>0</span></span> <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>R</span><span>0</span><span>0</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>I</span><span>T</span><span>0</span><span>1</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>X</span><span>Y</span><span>Z</span><span>1</span></span></div>
+<p>T moves the origin to the camera position and R aligns the world axes with the camera axes (world → camera). Π is the projection that drops the 4th coordinate, projecting 3D onto the image plane (camera → film). K converts units and shifts to the principal point, with skew (film → pixel). Homogeneous coordinates make every step a matrix multiplication.</p></div>
+
+<div class="q"><h3>Q7. Mosaics with homography <span class="pts">12%</span></h3>
+<p>a) Stitch several overlapping images into one large image (panorama).<br>b) When the conditions hold, one image maps to the other by a 3×3 H. Estimate H from corresponding points in the overlap, then warp all images into one coordinate system.<br>c) (1) Both images view the same plane from different angles; (2) both images come from the same camera (same position) at different angles; (3) the camera rotates about its COP without translation. <i>The reference answer lists only 2; write all 3.</i><br>d) Data requirements: overlapping images, taken by rotating in place (or of a planar scene), at least 4 corresponding pairs (from feature matching), no 3 collinear. Linear system: see Homography in the Theory tab. Each pair gives 2 rows of a 2N×8 matrix; solve Ah = b (least squares if N &gt; 4).</p></div>
+
+<div class="q"><h3>Q8. Projection matrix <span class="pts">12%</span></h3>
+<p>a) See how to build A·P = 0 and pick the smallest eigenvector of AᵀA in the Theory tab.</p>
+<p>b) Three pairs (1,2,0)→(0,4), (2,0,3)→(1,2), (1,1,4)→(2,3):</p>
+<div class="f"><span class="mat" style="grid-template-columns:repeat(12,auto)"><span>1</span><span>2</span><span>0</span><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>2</span><span>0</span><span>1</span><span>−4</span><span>−8</span><span>0</span><span>−4</span><span>2</span><span>0</span><span>3</span><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>−2</span><span>0</span><span>−3</span><span>−1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>2</span><span>0</span><span>3</span><span>1</span><span>−4</span><span>0</span><span>−6</span><span>−2</span><span>1</span><span>1</span><span>4</span><span>1</span><span>0</span><span>0</span><span>0</span><span>0</span><span>−2</span><span>−2</span><span>−8</span><span>−2</span><span>0</span><span>0</span><span>0</span><span>0</span><span>1</span><span>1</span><span>4</span><span>1</span><span>−3</span><span>−3</span><span>−12</span><span>−3</span></span> <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>P11</span><span>P12</span><span>⋮</span><span>P34</span></span> = 0</div>
+<p>Matches the reference. Add one sentence: 3 pairs give only 6 equations, not enough for 11 DoF; in practice you need at least 6 pairs.</p>
+<p>c) P = [M | P₄], M = KR, P₄ = KT. QR(M⁻¹) = QR ⇒ K = R⁻¹, R<sub>rot</sub> = Q⁻¹, T = K⁻¹P₄. (The reference has a typo "R = K[R|T]"; it should be P = K[R|T].)</p></div>
+
+<div class="q"><h3>Q9. Epipolar geometry <span class="pts">10%</span></h3>
+<figure><img src="img/e22-004.png" alt="Epipolar geometry figure with epipolar plane, image planes, epipolar lines, optical centers and epipoles" loading="lazy"><figcaption>a) The figure to draw (from the reference answer)</figcaption></figure>
+<p>a) Mark: the two centres O<sub>l</sub>, O<sub>r</sub>, the baseline, the point P, the epipolar plane (triangle O<sub>l</sub>–O<sub>r</sub>–P), the epipolar lines, and the epipoles e<sub>l</sub>, e<sub>r</sub>.<br>b) The match of p must lie on the epipolar line l′. Reason: every 3D point on the ray O→p projects to p, and this ray together with the baseline spans the epipolar plane; its image in the right camera is the intersection of that plane with the right image plane, i.e. l′. Algebraically: pᵀE p′ = 0.</p></div>
+
+<div class="q"><h3>Q10. 1-D K-means <span class="pts">9%</span></h3>
+<p>Data: 1, 2, 4, 6, 7, 8, 12, 16, 20, 30. Exact computation (no rounding):</p>
+<div class="tbl"><table><tr><th>Part</th><th>Iter</th><th>Clusters</th><th>New centres</th></tr>
+<tr><td rowspan="3">a) 4, 16</td><td>1</td><td>{1,2,4,6,7,8} {12,16,20,30}</td><td class="num">4.67, 19.5</td></tr>
+<tr><td>2</td><td>{1,2,4,6,7,8,12} {16,20,30}</td><td class="num">5.71, 22</td></tr>
+<tr><td>3</td><td>unchanged, converged</td><td class="num">5.71, 22</td></tr>
+<tr><td rowspan="5">b) 1, 6</td><td>1</td><td>{1,2} {4,…,30}</td><td class="num">1.5, 12.875</td></tr>
+<tr><td>2</td><td>{1,2,4,6,7} {8,12,16,20,30}</td><td class="num">4, 17.2</td></tr>
+<tr><td>3</td><td>{1,2,4,6,7,8} {12,16,20,30}</td><td class="num">4.67, 19.5</td></tr>
+<tr><td>4</td><td>{1,…,12} {16,20,30}</td><td class="num">5.71, 22</td></tr>
+<tr><td>5</td><td>unchanged, converged</td><td class="num">5.71, 22</td></tr>
+<tr><td rowspan="2">c) 2, 7, 20</td><td>1</td><td>{1,2,4} {6,7,8,12} {16,20,30}</td><td class="num">2.33, 8.25, 22</td></tr>
+<tr><td>2</td><td>unchanged, converged</td><td class="num">2.33, 8.25, 22</td></tr></table></div>
+<div class="note"><b>Note:</b> the reference rounds every centre up (ceiling). The final clusters are the same as the exact computation in all three parts. The reference for part c writes the third initial centre as 10; it should be 20. Parts a and b end at the same result, showing that different initializations can converge to the same solution.</div></div>
+</section>
+
+<!-- ===================== 2023 ===================== -->
+<section class="view" id="v-exam-2023" hidden>
+<h2>2023 Midterm Solutions</h2>
+
+<div class="q"><h3>Q1. Definition, applications, challenges <span class="pts">12%</span></h3><p>Same as 2022 Q1. List 5 of the 7 challenges: view point variation, illumination, occlusion, scale, deformation, background clutter, intra-class variation.</p></div>
+
+<div class="q"><h3>Q2. Sobel and Harris <span class="pts">16%</span></h3>
+<figure class="fig-sm"><img src="img/e23-000.png" alt="Sobel masks" loading="lazy"><figcaption>Masks given in the exam</figcaption></figure>
+<p>3×3 image = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>200</span><span>200</span><span>200</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span><span>0</span></span>, zero-padded to 5×5.</p>
+<p>a) Using correlation (mask applied as is, not flipped):</p>
+<div class="f">S_x = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>400</span><span>0</span><span>−400</span><span>200</span><span>0</span><span>−200</span><span>0</span><span>0</span><span>0</span></span>      S_y = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>0</span><span>0</span><span>600</span><span>800</span><span>600</span><span>0</span><span>0</span><span>0</span></span>
+With the mask flipped (true convolution): S_x = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>−400</span><span>0</span><span>400</span><span>−200</span><span>0</span><span>200</span><span>0</span><span>0</span><span>0</span></span>,  S_y = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>0</span><span>0</span><span>−600</span><span>−800</span><span>−600</span><span>0</span><span>0</span><span>0</span></span></div>
+<div class="note"><b>Note:</b> the reference answer clips the results to [0, 255] for display as an image (−400 → 0, 400 → 255, 200 kept). Write the raw values first, then mention clipping if you use it; both flipped and unflipped answers are accepted.</div>
+<p>b) The 6 steps of Harris: see the Theory tab.</p>
+<div class="f">c) At (1,1), raw values:  Ix² = 0² = 0,   Iy² = 800² = 640000,   Ixy = 0·800 = 0
+   (With the reference's clipped, unflipped data: Ix² = 0, Iy² = 255², Ixy = 0)
+
+d) The 1/9 window covers the whole 3×3:
+   S_x² = (400² + 400² + 200² + 200²)/9 = 400000/9 ≈ 44444
+   S_y² = (600² + 800² + 600²)/9 = 1360000/9 ≈ 151111
+   S_xy = Σ S_x·S_y / 9 = 0    (no cell has both S_x and S_y non-zero)
+   H(1,1) = <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>44444</span><span>0</span><span>0</span><span>151111</span></span>
+   R = det − 0.04·trace² ≈ 6.72·10⁹ − 0.04·(195556)² ≈ 5.19·10⁹ > 0</div>
+<div class="note"><b>Error in the reference:</b> in the unflipped case, the Ixy matrix shows 255² and 51000². Both are wrong because Ixy = Ix·Iy is element-wise: the correct values are 255·0 = 0 and 200·255 = 51000. So S<sub>xy</sub> in part d should be 51000/9, not (255² + 51000²)/9. With the clipped data: S<sub>x²</sub> = (255² + 200²)/9, S<sub>y²</sub> = 3·255²/9, S<sub>xy</sub> = 51000/9.</div></div>
+
+<div class="q"><h3>Q3. Co-occurrence <span class="pts">4%</span></h3>
+<figure class="fig-xs"><img src="img/e23-008.png" alt="3x3 image 1 1 0 / 1 1 1 / 0 0 1" loading="lazy"><figcaption>Image given in the exam</figcaption></figure>
+<p>The figure puts j at the top-left cell and i one row down, two columns right, i.e. j = i + (−1, −2). (The question writes D = (−1, −3), but the figure shows a 2-column offset, which is the only one that fits a 3-wide image.)</p>
+<div class="f">Valid pairs: i at (1,2) = 1 → j at (0,0) = 1;   i at (2,2) = 1 → j at (1,0) = 1
+C = <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>0</span><span>0</span><span>0</span><span>2</span></span></div></div>
+
+<div class="q"><h3>Q4. HoG with 4 channels over 0–360° <span class="pts">8%</span></h3>
+<figure class="fig-xs"><img src="img/e23-013.png" alt="Gradient directions 10 100 32 / 85 150 25 / 5 270 110" loading="lazy"><figcaption>Gradient directions (exam)</figcaption></figure>
+<p>Magnitudes <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>5</span><span>10</span><span>5</span><span>15</span><span>10</span><span>5</span><span>20</span><span>10</span><span>20</span></span>. Each bin is 90°.</p>
+<div class="tbl"><table><tr><th>Bin</th><th>Pixels</th><th class="num">a) Count</th><th class="num">b) Magnitude sum</th><th class="num">b) Normalized /100</th></tr>
+<tr><td>0–90°</td><td>10, 32, 85, 25, 5</td><td class="num">5</td><td class="num">5+5+15+5+20 = 50</td><td class="num">0.50</td></tr>
+<tr><td>90–180°</td><td>100, 150, 110</td><td class="num">3</td><td class="num">10+10+20 = 40</td><td class="num">0.40</td></tr>
+<tr><td>180–270°</td><td>270 (upper edge included)</td><td class="num">1</td><td class="num">10</td><td class="num">0.10</td></tr>
+<tr><td>270–360°</td><td>—</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr></table></div>
+<div class="slides">
+  <figure><img src="img/e23-009.png" alt="HoG counts histogram: 5, 3, 1" loading="lazy"><figcaption>a) Reference histogram (counts)</figcaption></figure>
+  <figure><img src="img/e23-014.png" alt="HoG weighted histogram: 0.5, 0.4, 0.1" loading="lazy"><figcaption>b) Reference histogram (magnitude-weighted)</figcaption></figure>
+</div>
+<p>The reference puts 270° in the "180–270" bin. With half-open bins [270, 360) it would fall in the last bin; state your boundary convention.</p></div>
+
+<div class="q"><h3>Q5. Size of the covariance matrix <span class="pts">4%</span></h3>
+<p>20×20 images → 400×1 vectors. 10 people × 5 images = 50 images, so A is 400×50 and C = AAᵀ/(50 − 1) is <b>400 × 400</b>.</p>
+<div class="note"><b>Note:</b> the reference writes A as 400×10 and divides by 10 − 1, which is wrong (there are 50 images), but its conclusion 400×400 is correct.</div></div>
+
+<div class="q"><h3>Q6. Linear combination and Eigenface <span class="pts">6%</span></h3>
+<div class="f">a) B = <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>2</span><span>1</span><span>3</span><span>−1</span></span>,  C = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>1</span><span>−1</span></span>
+   B·C = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>2·1</span><span>+</span><span>1·(−1)</span><span>3·1</span><span>+</span><span>(−1)(−1)</span></span> = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>1</span><span>4</span></span>
+   = 1·<span class="mat" style="grid-template-columns:repeat(1,auto)"><span>2</span><span>3</span></span> + (−1)·<span class="mat" style="grid-template-columns:repeat(1,auto)"><span>1</span><span>−1</span></span> = <span class="mat" style="grid-template-columns:repeat(1,auto)"><span>1</span><span>4</span></span>   ⇒ a matrix–vector product is a linear combination of the columns of B</div>
+<p>b) Each (mean-subtracted) face M ≈ Σ aᵢuᵢ, where uᵢ are the eigenfaces (columns of the eigenvector matrix) and aᵢ = Mᵀuᵢ are the <b>projection coefficients</b>. The vector (a₁, …, a<sub>k</sub>) is the feature used by NN. The reference calls aᵢ "eigenvalues", which is wrong.</p></div>
+
+<div class="q"><h3>Q7. K-means with K = 3 <span class="pts">10%</span></h3>
+<p>Data 0, 2, 5, 8, 10, 15, 24, 30, 50, 60, 80, 100. No initial centres are given; the reference uses 8, 30, 80.</p>
+<div class="f">Iter 1: {0,2,5,8,10,15} {24,30,50} {60,80,100}  →  centres 6.67, 34.67, 80
+Iter 2: unchanged (15: 8.3 vs 19.7; 50: 15.3 vs 30; 60: 25.3 vs 20)  →  converged</div>
+<p>b) Compute SSE = ΣΣ‖p − cᵢ‖² (sum of squared distances from each point to its cluster centre) for each result. The result with the smaller SSE is better (tighter clusters).</p></div>
+
+<div class="q"><h3>Q8. Finding K, R, T from n 3D–2D pairs <span class="pts">15%</span></h3>
+<p>The highest-scoring question. Present all 4 parts: (1) the model x = K[R|T]X = PX; (2) cross-multiply to get 2 equations per pair, stack into A (2N×12)·P = 0; (3) min‖AP‖² with ‖P‖ = 1; AᵀA is symmetric PSD and PᵀAᵀAP = λ, so choose the eigenvector with the smallest λ; (4) P = [M|P₄], QR(M⁻¹) gives K = R⁻¹, R = Q⁻¹, T = K⁻¹P₄. Details in the Theory tab.</p></div>
+
+<div class="q"><h3>Q9. Mosaics with homography <span class="pts">12%</span></h3><p>Identical to 2022 Q7. The 2023 reference lists all 3 homography conditions.</p></div>
+
+<div class="q"><h3>Q10. Image formation <span class="pts">13%</span></h3>
+<figure><img src="img/e23-015.png" alt="Image formation figure" loading="lazy"><figcaption>Figure used in the reference answer</figcaption></figure>
+<p>a) An illumination source lights the scene element. The surface reflects light, according to its properties, into the imaging system (e.g. pinhole or lens). The system projects it onto the internal image plane (film coordinates); the sensor samples it and, through the intrinsic parameters, produces the output digital image in pixel coordinates.</p>
+<p>b) Geometric, Optical, Photometric, Sensor. See the four cards at the start of Unit 3 in the Theory tab.</p></div>
+</section>
+
+<!-- ===================== PRACTICE ===================== -->
+<section class="view" id="v-practice" hidden>
+<h2>"Course Practice" problems from Unit 2</h2>
+<p>Many 114-1 calculation questions come straight from these.</p>
+<div class="tbl"><table>
+<tr><th>Problem</th><th>Solution</th></tr>
+<tr><td>2-1 Pixel (grayscale 300×200)</td><td>60,000 pixels, 60,000 bytes</td></tr>
+<tr><td>2-2 Color image 300×200</td><td>60,000 pixels, 180,000 bytes</td></tr>
+<tr><td>2-3 Histogram of <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>1</span><span>1</span><span>255</span><span>1</span><span>1</span><span>255</span><span>1</span><span>1</span><span>255</span></span></td><td>x-axis 0–255, y-axis 0–9. h(1) = 6, h(255) = 3, all other values 0.</td></tr>
+<tr><td>2-4 Sobel on <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>0</span><span>200</span><span>0</span><span>0</span><span>200</span><span>0</span><span>0</span><span>200</span></span> (zero-padding, correlation)</td><td>S<sub>x</sub> = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>600</span><span>0</span><span>0</span><span>800</span><span>0</span><span>0</span><span>600</span><span>0</span></span>, S<sub>y</sub> = <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>0</span><span>−200</span><span>−400</span><span>0</span><span>0</span><span>0</span><span>0</span><span>200</span><span>400</span></span>. At the centre: dx = 800, dy = 0, so θ = 0° (vertical edge).</td></tr>
+<tr><td>2-5 Co-occurrence of <span class="mat" style="grid-template-columns:repeat(3,auto)"><span>1</span><span>1</span><span>0</span><span>1</span><span>1</span><span>1</span><span>0</span><span>0</span><span>1</span></span></td><td>2 gray levels → 2×2 matrix. Assuming d = (0, 1) (j directly right of i): C = <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>1</span><span>1</span><span>1</span><span>3</span></span>, 6 pairs. (The d figure on the slide is not in the text file; check the direction.)</td></tr>
+<tr><td>2-6 HoG, 9 channels over 0–360° (40° bins)</td><td>Directions [10,100,32,85,150,25,5,270,110], magnitudes [10,15,1,20,5,5,10,12,25].<br>a) Counts: [0–40): 4 · [80–120): 3 · [120–160): 1 · [240–280): 1, others 0.<br>b) Magnitude-weighted: [0–40): 10+1+5+10 = 26 · [80–120): 15+20+25 = 60 · [120–160): 5 · [240–280): 12.</td></tr>
+<tr><td>2-7 Covariance (8 people × 10 images, 30×30)</td><td>900 × 900</td></tr>
+<tr><td>2-8 PCA</td><td>Eigenvectors show the directions of the patterns (principal axes) in the data. Compression happens in step 5 (choosing components, dropping small-λ eigenvectors) and step 6 (projecting the data).</td></tr>
+<tr><td>2-9 Matrix decomposition</td><td>See 2023 Q6a: B·C = c₁·(column 1) + c₂·(column 2).</td></tr>
+<tr><td>NN: Mary (5,2), John (0,2), Andy (6,1), mysterious guy (8,3)</td><td>SAD: Mary 3+1 = 4, John 8+1 = 9, Andy 2+2 = 4 → tie between Mary and Andy.<br>SSD: Mary 9+1 = 10, John 64+1 = 65, Andy 4+4 = <b>8</b> → Andy.</td></tr>
+<tr><td>Harris at (3,3) of the 5×5 image, 3×3 window of ones</td><td>Assuming 1-based indexing (centre is the 0 at row 3, column 3), Sobel correlation, zero-padding, k = 0.04:<br>H = <span class="mat" style="grid-template-columns:repeat(2,auto)"><span>267</span><span>69</span><span>69</span><span>187</span></span>, R = 49929 − 4761 − 0.04·454² ≈ <b>36923</b> &gt; 0 (corner).</td></tr>
+<tr><td>SIFT, r = 10</td><td>Threshold (r+1)²/r = 12.1.<br>(2, 40): 42²/80 = 22.05 &gt; 12.1 → <b>discard</b> (ratio 20 &gt; 10).<br>(1, 5): 36/5 = 7.2 &lt; 12.1 → <b>keep</b> (ratio 5 &lt; 10).</td></tr>
+<tr><td>K-means K = 2 on 0, 2, 3, 5, 8, 10 (centres 0, 10)</td><td>Iter 1: {0,2,3,5} {8,10} (5 is a tie, put in cluster 1), centres 2.5, 9. Iter 2: unchanged, converged.</td></tr>
+</table></div>
+</section>
+
+<!-- ===================== QUIZ ===================== -->
+<section class="view" id="v-quiz" hidden>
+<h2>114-1 multiple-choice practice</h2>
+<p>All 109 questions with the reference key. Click an option to check it. Calculation questions include a short worked answer. The 4 questions marked "free" in the original key (everyone got the points) show the correct answer from the slides.</p>
+<div class="qz-bar">
+  <label for="qz-ch" class="mono" style="font-size:13px">Unit</label>
+  <select id="qz-ch"><option value="0">All</option><option value="1">Unit 1 Introduction</option><option value="2">Unit 2 Feature Extraction</option><option value="3">Unit 3 Image Formation</option><option value="4">Unit 4 Stereo</option></select>
+  <button id="qz-wrong" type="button">Only missed</button>
+  <button id="qz-shuffle" type="button">Shuffle</button>
+  <button id="qz-reset" type="button">Reset</button>
+  <span class="score" id="qz-score">0 / 0</span>
+</div>
+<div id="qz-list"></div>
+</section>
+</main>
+<script id="mcq" type="application/json">[{"n":1,"a":"B","q":"What is the primary goal of computer vision algorithms, according to the sources?","o":["To replace conventional computing hardware","To extract useful numerical or symbolic information from images and videos","To provide fast memory and computational time","To solve non-linear mapping problems only"],"c":1},{"n":2,"a":"B","q":"In an 8-bit grayscale image, what is the range of possible intensity values for a pixel?","o":["0 to 128","0 to 255","1 to 256","-1 to 1"],"c":2},{"n":3,"a":"C","q":"What is the smallest element of an image?","o":["Byte","Bit","Pixel","Vector"],"c":2},{"n":4,"a":"D","q":"How many bytes are used to represent the intensity of one pixel in an 8-bit grayscale image?","o":["4 bytes","3 bytes","2 bytes","1 byte"],"c":2},{"n":5,"a":"C","q":"What does the intensity value 255 typically represent in an 8-bit grayscale image?","o":["Black pixels","Dark pixels","White pixels","Zero gradient"],"c":2},{"n":6,"a":"B","q":"An RGB color image can be decomposed into how many layers?","o":["Two layers (Intensity and Color)","Three layers (Red, Green, Blue)","Four layers (Cyan, Magenta, Yellow, Black)","One layer (Grayscale)"],"c":2},{"n":7,"a":"B","q":"Which conventional computer vision method is often replaced by deep learning models, according to the current trend?","o":["Input data processing","Feature extraction","Output prediction","Model tuning"],"c":1},{"n":8,"a":"B","q":"What kind of images are typically produced by applying a thresholding function to an image?","o":["Grayscale images","Binary images (black and white only)","Highly contrasted images","Color images"],"c":2},{"n":9,"a":"C","q":"What mathematical representation describes the frequency distribution of pixel values in an image?","o":["Contrast stretching function","Homography matrix","Histogram","Convolution mask"],"c":2},{"n":10,"a":"B","q":"What property of a histogram is described by h(i) = vi for min ≤ i ≤ max, where vi is the number of instances of value i?","o":["Cumulative distribution","Discrete function for frequency distribution","Normalized distribution","Image gradient magnitude"],"c":2},{"n":11,"a":"B","q":"The image gradient vector points in the direction of the largest possible change in which property?","o":["Pixel coordinates","Intensity or color","Image dimension","Noise level"],"c":2},{"n":12,"a":"B","q":"The length of the image gradient vector corresponds to what measure?","o":["The image’s overall resolution","The rate of change in that direction (edge strength)","The variance of the image","The convolution result"],"c":2},{"n":13,"a":"C","q":"The operation where each output pixel is computed as a weighted sum of neighboring input pixels is called:","o":["Thresholding","Covariance","Convolution","Normalization"],"c":2},{"n":14,"a":"D","q":"What is the name of the matrix of coefficients used in the convolution operation?","o":["Eigenvector matrix","Feature vector","Homography matrix","Convolution mask (or filter)"],"c":2},{"n":15,"a":"C","q":"What visual effect is created when Gaussian filtering is applied to an image?","o":["Sharpening","Edge detection","Blurring (smoothing)","Increasing contrast"],"c":2},{"n":16,"a":"B","q":"What does a smaller standard deviation (STD) in a data set indicate?","o":["The data is more spread out.","The data is more compact and centered near the mean.","The data has independent dimensions.","The data set size is smaller."],"c":2},{"n":17,"a":"B","q":"If the covariance value between two dimensions is positive, what does this indicate about their relationship?","o":["They are independent of each other.","They increase together.","One increases while the other decreases.","The dimensions are normalized."],"c":2},{"n":18,"a":"B","q":"What is the relationship between variance and standard deviation (SD)?","o":["Variance is the square root of SD","Variance is the square of SD","Variance is the summation of SD","They are mathematically unrelated."],"c":2},{"n":19,"a":"C","q":"In a covariance matrix, what do the diagonal entries represent?","o":["The covariance between two different dimensions.","The mean of each dimension.","The variance of each dimension.","The total number of samples."],"c":2},{"n":20,"a":"B","q":"What is a “texel”?","o":["A pixel with zero intensity.","A texture pixel, forming a repeated pattern.","A pixel classified as a corner.","A pixel value greater than 255."],"c":2},{"n":21,"a":"C","q":"What is the primary purpose of the Laws Algorithm in texture analysis?","o":["To solve linear systems.","To detect corners.","To compute texture energy features using texture filters.","To normalize image pixel values."],"c":2},{"n":22,"a":"B","q":"The SIFT feature descriptor is claimed to be invariant to scale, orientation, affine distortion, and partially invariant to what other change?","o":["Geometric perspective projection","Illumination changes","Image gradient zero-crossing","Co-occurrence matrix size"],"c":2},{"n":23,"a":"C","q":"What does “BoF” stand for in the context of image representation?","o":["Best of Features","Binary Operation Filter","Bag-ofFeatures","Byte-order Format"],"c":2},{"n":24,"a":"B","q":"In the image formation process, what is the term for the distance from the Center of Projection (COP) to the image plane?","o":["Aperture size","Focal length (f)","Projection error","Aspect ratio"],"c":3},{"n":25,"a":"C","q":"If a pinhole camera’s aperture size is made smaller, what happens to the projected image?","o":["It becomes blurrier.","It becomes brighter.","It gets sharper, but dimmer.","It becomes inverted."],"c":3,"e":"Smaller hole → fewer rays per image point → sharper but dimmer."},{"n":26,"a":"C","q":"What physical component in the human eye functions similarly to the film in a camera?","o":["The pupil","The iris","The retina","The lens"],"c":3},{"n":27,"a":"C","q":"What is the fundamental property of perspective projection demonstrated in ancient art?","o":["Distances and angles are preserved.","Parallel lines remain parallel.","Objects closer to the viewer appear larger.","Objects are always projected right-side up."],"c":3},{"n":28,"a":"C","q":"The coordinates used to describe the final 2D image (e.g., 200x300 resolution) are called:","o":["World coordinates","Camera coordinates","Pixel coordinates","Homogeneous coordinates"],"c":3},{"n":29,"a":"C","q":"What is the primary method used to simplify matrix multiplication when dealing with division (such as X/Z) in perspective projection equations?","o":["L1 norm","Taylor expansion","Homogeneous coordinates","Orthogonal matrices"],"free":true,"c":3,"e":"Marked \"free\" in the key (everyone got the points). Correct answer: homogeneous coordinates — adding one coordinate turns the division by Z into a matrix multiplication."},{"n":30,"a":"B","q":"If a 3D point X, Y, Z is represented in homogeneous coordinates, how is it typically written?","o":["(X, Y, Z, 0)","(X, Y, Z, 1)","(X/Z, Y/Z, 1)","(X, Y, Z)"],"c":3},{"n":31,"a":"C","q":"The intrinsic camera parameters (K matrix) relate to the properties inside the camera, such as focal length and principal point. What type of matrix is K?","o":["Identity matrix","Lower triangular matrix","Upper triangular matrix","Orthogonal matrix"],"c":3},{"n":32,"a":"B","q":"What phenomenon describes the deviation of light rays passing through the edges of a lens, causing distorted images like “pin cushion” or “barrel” effects?","o":["Photometric lighting","Radial distortion","Orthographic projection","Perspective translation"],"c":3},{"n":33,"a":"C","q":"What term describes the range of distance in a scene where objects appear acceptably sharp in focus?","o":["Focal length","Center of Projection","Depth of field","Aspect ratio"],"c":3},{"n":34,"a":"B","q":"The phenomenon where an image’s brightness or saturation is reduced at the periphery compared to the center is called:","o":["Diffuse reflection","Vignetting","Specular reflection","Image gradient"],"c":3},{"n":35,"a":"B","q":"What is the full name of BRDF, the function used to describe the surface condition of an object and how it reflects light?","o":["Binary Radial Distance Function","Bidirectional Reflectance Distribution Function","Blurred Region Detection Filter","Binary Reflectance Detail Function"],"c":3},{"n":36,"a":"C","q":"Which type of reflection scatters light uniformly in all directions due to the properties of the surface, resulting in a constant BRDF function?","o":["Specular reflection","Ambient reflection","Diffusion (Lambertian) reflection","Phong reflection"],"c":3},{"n":37,"a":"C","q":"What type of sensor arrays convert photons to electrons inside a digital camera?","o":["LCD or LED","RAM or ROM","CCD or CMOS","CPU or GPU"],"c":3},{"n":38,"a":"B","q":"The process of calculating missing color channels (R, G, or B) for a pixel where only one channel was recorded by the sensor (e.g., in a Bayer grid) is called:","o":["Denoising","Mosaicing (Demosaicing)","Compression","Sharpening"],"c":3},{"n":39,"a":"C","q":"What type of coordinate system uses X, Y, Z axes and its origin is fixed at the location of the camera’s optical center (COP)?","o":["World coordinates","Pixel coordinates","Camera coordinates","Homogeneous coordinates"],"c":3},{"n":40,"a":"B","q":"If a line passes through the focal point (COP) during perspective projection, what is the degenerate result in the image?","o":["It projects to a line.","It projects to a point.","It projects to a plane.","It disappears entirely."],"c":3},{"n":41,"a":"C","q":"A grayscale image has a size of 300 × 200. How many total pixels are in the image?","o":["500","6,000","60,000","180,000"],"c":2,"e":"300 × 200 = 60,000 pixels."},{"n":42,"a":"B","q":"How many total bytes are required to store an RGB color image with a resolution of 300 × 200, assuming 8 bits per channel?","o":["60,000 bytes","180,000 bytes","240,000 bytes","600 bytes"],"c":2,"e":"60,000 pixels × 3 channels × 1 byte = 180,000 bytes."},{"n":43,"a":"C","q":"If a 3 × 3 image is being represented in a histogram, what is the maximum possible count value on the y-axis?","o":["3","6","9","255"],"c":2,"e":"A 3×3 image has 9 pixels, so at most 9 pixels share one value."},{"n":44,"a":"C","q":"When performing convolution using an 8 × 8 image and a 3 × 3 filter, what will be the dimension of the resulting image, assuming standard convolution without padding?","o":["8 × 8","10 × 10","6 × 6","7 × 7"],"c":2,"e":"No padding: 8 − 3 + 1 = 6 → 6×6."},{"n":45,"a":"B","q":"The gradient direction (θ) is calculated using tan−1(dy/dx). If dx = 255 and dy = 255, what is the gradient direction?","o":["0∘","45∘","90∘","−90∘"],"c":2,"e":"tan⁻¹(255/255) = tan⁻¹(1) = 45°."},{"n":46,"a":"C","q":"When applying image gradient analysis, if the intensity change along the x-direction (dx ) is zero, and the change along the y-direction (dy ) is a strong positive value, what is the approximate gradient angle?","o":["0∘","45∘","90∘","−90∘"],"c":2,"e":"dx = 0, dy > 0 → tan⁻¹(+∞) = 90°."},{"n":47,"a":"B","q":"When using the Local Binary Pattern (LBP) method for texture analysis, how is a neighbor’s pixel value compared to the center pixel to determine the bit pattern?","o":["If the neighbor is larger than the center, assign 0; otherwise 1.","If the neighbor is greater than or equal to the center, assign 1; otherwise 0.","Assign 1 only if the neighbor is exactly equal to the center.","Assign the difference between the neighbor and the center. 2"],"c":2,"e":"The slide says: bit = 0 if neighbour ≤ centre, 1 otherwise. The key picks B (≥ → 1); choose B for this exact question."},{"n":48,"a":"D","q":"For a co-occurrence matrix C(i, j), what property is measured by calculating the summation over all (i, j) of N(i, j)², where N is the normalized matrix?","o":["Entropy","Contrast","Homogeneity","Energy (uniformity)"],"free":true,"c":2,"e":"Marked \"free\". Correct answer: Energy (uniformity) = Σ N(i,j)²."},{"n":49,"a":"A","q":"What is the fundamental idea behind the Histogram of Oriented Gradient (HoG) descriptor?","o":["Local appearance and shape can be described by the distribution of gradients and their directions.","Images should be converted to grayscale before any processing.","Objects are best recognized using global texture features.","The descriptor should only rely on low-level color information."],"c":2},{"n":50,"a":"B","q":"In the HoG process, if the orientation range (0∘ to 360∘ ) is partitioned into 9 histogram channels (bins), what is the degree range covered by each bin?","o":["30∘","40∘","45∘","60∘"],"c":2,"e":"360° / 9 = 40° per bin."},{"n":51,"a":"D","q":"When using Principal Component Analysis (PCA), which measure is calculated between two different dimensions of the data?","o":["Variance","Mean","Standard Deviation","Covariance"],"c":2},{"n":52,"a":"C","q":"In PCA, the eigenvectors of the covariance matrix show what property of the data?","o":["The mean of the data set.","The rotation required to align the data to the origin.","The spread or direction of the data distribution (principal axes).","The total dimension of the data."],"c":2},{"n":53,"a":"C","q":"Which of the following is the principal component of a data set in PCA?","o":["The eigenvector with the smallest corresponding eigenvalue.","The eigenvector that is perpendicular to the direction of maximum variance.","The eigenvector with the highest corresponding eigenvalue.","Any randomly chosen eigenvector."],"c":2},{"n":54,"a":"B","q":"When applying PCA to achieve dimension reduction, how is the number of dimensions to keep usually decided?","o":["Randomly selecting half of the original dimensions.","By calculating the cumulative sum of eigenvalues to meet a preservation threshold (e.g., 95%).","By choosing the eigenvectors that are closest to zero.","By selecting all eigenvectors corresponding to negative eigenvalues."],"c":2},{"n":55,"a":"C","q":"In the context of Eigenfaces (PCA for face recognition), what typically happens when an eigenvector (or Eigenface) is transformed back to its 2D representation?","o":["It looks exactly like the original image.","It looks like a highly blurred and average face.","It represents a basis (pattern or axis) for the facial data.","It must be an identity matrix."],"c":2},{"n":56,"a":"B","q":"The recognition step in Eigenface approach often uses which classification method to determine the identity of a test sample?","o":["Support Vector Machine (SVM)","Nearest Neighbor (NN) classification","K-means clustering","Maximum Likelihood Estimation"],"c":2},{"n":57,"a":"B","q":"When calculating the Sum of Absolute Distance (SAD) between two projected feature vectors X and P, how is the distance measured?","o":["Sum of the square of the difference for each dimension.","Sum of the absolute value of the difference for each dimension.","Cosine of the angle between the two vectors.","Product of the two vectors."],"c":2},{"n":58,"a":"C","q":"Harris corner detection measures the change in image content when a sliding window is shifted in different directions. For a corner region, what type of change is observed?","o":["No change observed in any direction.","Significant change observed only along the edge direction.","Significant changes observed in all directions.","Only slight changes observed due to noise."],"c":2},{"n":59,"a":"C","q":"In Harris corner detection, when the eigenvalues (λ1 and λ2) of the structure tensor M are sorted, what region type is indicated if λ1 ≫ λ2 (one large, one small)?","o":["Flat region","Corner","Edge","Noise"],"c":2},{"n":60,"a":"C","q":"The Difference of Gaussians (DoG) operation acts as what type of filter?","o":["Low-pass filter","High-pass filter","Band-pass filter","Median filter"],"c":2,"e":"DoG = difference of two low-pass images → band-pass: removes high-frequency noise and low-frequency homogeneous areas."},{"n":61,"a":"B","q":"The process of eliminating edge responses in SIFT is crucial because edge keypoints are often:","o":["Highly stable","Poorly determined (unstable)","Always correctly localized","Easy to match"],"c":2},{"n":62,"a":"B","q":"In the SIFT keypoint descriptor creation (Step 4), how many gradient histograms are typically created, and what is the resulting total dimension of the descriptor vector?","o":["8 histograms, 64 dimensions","16 histograms, 128 dimensions","36 histograms, 36 dimensions","4 histograms, 32 dimensions"],"c":2},{"n":63,"a":"C","q":"What is the fundamental constraint used in K-means clustering to determine which points belong to a given cluster center ci ?","o":["The point must be exactly equal to ci .","The point must be the mean of the cluster.","The point is associated with the closest ci .","The point is associated with the furthest ci ."],"c":2},{"n":64,"a":"C","q":"When updating the cluster center (ci ) in K-means clustering (Step 3), how is the new center calculated?","o":["By randomly initializing a new position.","By finding the maximum distance point in the cluster.","By calculating the average (mean) of all points belonging to the cluster.","By using the oldest point in the cluster."],"c":2},{"n":65,"a":"B","q":"What is the core drawback of the standard Bag-of-Features (BoF) model?","o":["It requires too many training images.","It loses the spatial information of the visual words.","It cannot use SIFT features.","It is computationally expensive."],"c":2},{"n":66,"a":"C","q":"What problem in image formation is approximated by assuming the distance from the Center of Projection (COP) to the projection plane is infinite, resulting in (X, Y, Z) → (X, Y)?","o":["Perspective projection","Weak perspective projection","Orthographic projection (parallel projection)","Homography"],"c":3},{"n":67,"a":"B","q":"The “extrinsic camera parameters” primarily describe the transformation between which two coordinate systems?","o":["Pixel coordinates and image coordinates.","World coordinates and camera coordinates (Rotation R and Translation T).","Homogeneous coordinates and Cartesian coordinates.","Focal length and principal point."],"c":3},{"n":68,"a":"C","q":"When decomposing the Projection Matrix P (3x4) into K, R, and T matrices, what term represents the rotation and translation components?","o":["Intrinsic Matrix (K)","Principal Point","Extrinsic Matrix ([R|T])","Projection Error"],"c":3},{"n":69,"a":"B","q":"In the context of the homography condition for mosaics, which condition must hold when taking two images?","o":["The camera position must change significantly.","Both images must be viewing the same plane from a different angle.","The scene structure must be highly complex.","The image features must be randomly distributed."],"c":3},{"n":70,"a":"B","q":"If the distance to an object center (TZ ) is much larger than the size of the object (‖P‖), the scale of the projected object depends on which ratio, making it difficult to distinguish zoom change from motion toward the user? (Where f is focal length)","o":["TZ /f","f/TZ","‖P‖/TZ","f × ‖P‖"],"c":3},{"n":71,"a":"B","q":"When using a professional camera, setting a larger aperture (a larger hole size) typically results in what visual effect regarding depth of field?","o":["Increased depth of field (everything is clear).","Decreased depth of field (blurry background, sharp foreground).","Increased vignetting effect.","A sharper image across all depths."],"c":3,"e":"Large aperture → shallow depth of field (blurry background). Small aperture → large DoF."},{"n":72,"a":"C","q":"For a rotation matrix R, what is its special property that simplifies finding its inverse?","o":["It is an identity matrix.","It is a lower triangular matrix.","It is an orthogonal matrix, so R−1 = RT .","It has a zero determinant."],"c":3},{"n":73,"a":"C","q":"When applying a transformation using Homogeneous Coordinates, if you multiply the entire projection matrix by a scalar D, how does this affect the final 2D coordinates (x, y)?","o":["The coordinates are scaled by D.","The coordinates are scaled by 1/D.","The coordinates remain unchanged (up to a scale).","The coordinates become blurred."],"c":3},{"n":74,"a":"C","q":"If the camera pixel axes are skewed (not perfectly perpendicular), which additional parameter must be included in the intrinsic matrix K?","o":["fx (horizontal focal length)","u0 (x-offset)","s (skew factor)","cy (y-offset)"],"c":3},{"n":75,"a":"B","q":"What property of parallel lines in a 3D scene is observed after they are captured using perspective projection?","o":["They remain parallel in the image.","They meet at a vanishing point in the image.","They maintain the original angle between them.","They project only to points."],"c":3},{"n":76,"a":"C","q":"When solving for the Projection Matrix P in the linear system AP = 0, what does minimizing the 2-norm, min‖AP‖2, approximate?","o":["Finding the mean of the corresponding points.","Finding the exact solution P.","Finding a solution P that makes AP as close to the zero matrix as possible.","Finding the orthogonal matrix P."],"c":3},{"n":77,"a":"C","q":"Which function from NumPy’s linear algebra module is typically used to find the solution x for a linear equation system Ax = b?","o":["np.linalg.dot()","np.linalg.inv(A)","np.linalg.solve(A, b)","np.linalg.det(A)"],"c":3},{"n":78,"a":"C","q":"The SIFT detection algorithm uses the ratio λmax/λmin of the structure tensor eigenvalues to eliminate which type of keypoints?","o":["Corner keypoints.","Flat region keypoints.","Edge response keypoints.","High-contrast keypoints."],"c":2},{"n":79,"a":"C","q":"The Laws texture energy features are computed by summing the absolute values of filtering results in local neighborhoods. This step is intended to achieve what property?","o":["Illumination invariance","Scale invariance","Rotational invariance","Geometric distortion"],"c":2},{"n":80,"a":"B","q":"What is the L1-norm distance calculated for vectors x = (x1 , x2 , . . . , xN )?","o":["√(∑|xi|²)","∑|xi|","max|xi|","Count of nonzero elements"],"c":2},{"n":81,"a":"D","q":"A face database consists of 8 persons, each with 10 images. The resolution of each image is 30 × 30. If each image is converted into a 900 × 1 vector, what is the dimension of the covariance matrix for this entire database?","o":["8 × 8","80 × 80","900 × 80","900 × 900"],"c":2,"e":"Each image is a 900×1 vector → C = AAᵀ/(n−1) is 900 × 900 (number of people/images does not matter)."},{"n":82,"a":"B","q":"In the SIFT keypoint localization step, keypoints along an edge are discarded if λmax/λmin is larger than a threshold r. Given a keypoint with eigenvalues α = 2 and β = 40, and the threshold r = 10, should the keypoint be kept or discarded?","o":["Kept (Ratio is 20, which is > 10)","Discarded (Ratio is 20, which is > 10)","Kept (Ratio is 0.05, which is < 10)","Discarded (Ratio is 0.05, which is < 10)"],"free":true,"c":2,"e":"Marked \"free\". λmax/λmin = 40/2 = 20 > r = 10 → discard (edge). With Lowe's exact test: Tr²/Det = (2+40)²/(2·40) = 22.05 > (r+1)²/r = 12.1 → still discard."},{"n":83,"a":"B","q":"Given the set of numbers {0,2,3,5,8,10}. If K-means clustering is applied with K = 2 and initial centers C1 = 0 and C2 = 10. After the first iteration, what is the updated mean for C1(Cluster 1)?","o":["0","2.5","4.5","5"],"c":2,"e":"Distances to 0 and 10: 0,2,3 → C1; 8,10 → C2; 5 is a tie (5 = 5), the key assigns it to C1 → mean(0,2,3,5) = 2.5."},{"n":84,"a":"B","q":"When solving the Projection Matrix P (3x4) from N corresponding 3D-to-2D pairs, the linear system AP = 0 must be solved. If N = 200 corresponding pairs are used, what are the dimensions of matrix A and the unknown vector P?","o":["A is 200 × 12; P is 12 × 1.","A is 400 × 12; P is 12 × 1.","A is 12 × 400; P is 400 × 1.","A is 400 × 3; P is 3 × 1."],"c":3,"e":"Each pair gives 2 equations → A: 2N × 12 = 400 × 12, P: 12 × 1."},{"n":85,"a":"B","q":"In PCA, if the data is reduced from 4 dimensions to 2 dimensions, what information is lost, and how can the original data be retrieved if all 4 eigenvectors were kept?","o":["No information is lost, and retrieval requires the inverse of the feature vector matrix.","Information corresponding to the lowest variance axes is lost, and retrieval requires the transpose of the feature vector matrix (if they are unit vectors).","Only the mean information is lost, and retrieval uses matrix inversion.","Data is permanently lost, regardless of how many eigenvectors are kept."],"c":2},{"n":86,"a":"C","q":"The objective function in K-means clustering minimizes the sum squared distance of each point to its closest center ci. Why might the algorithm converge to a local minimum rather than a global minimum?","o":["Because the iteration steps (Step 2 and 3) are too simple.","Because the initial assignment of members is calculated using the mean.","Because the solution depends on the random initialization of the cluster centers.","Because the objective function is highly non-linear."],"c":2},{"n":87,"a":"C","q":"Spatial Pyramid Matching (SPM) addresses the drawback of Bag-of-Features (BoF) by partitioning the image into multiple segments across different scales (e.g., 2L × 2L ). What key information is incorporated back into the descriptor by concatenating the histograms from all segments?","o":["Illumination invariance","Depth information","Spatial (location) information","Rotational invariance"],"c":2},{"n":88,"a":"B","q":"When transforming a 3D world coordinate system (UVW) to a camera coordinate system (XYZ), the transformation requires applying Rotation R and Translation T. In homogeneous coordinates, what is the representation of the resulting 4 × 4 transformation matrix?","o":["An identity matrix.","4 × 4 matrix combining a 3 × 3 rotation block, a 3 × 1 translation vector, and zeros/one on the bottom row.","A diagonal matrix with focal length values.","A 3 × 4 matrix combining K and R."],"c":3},{"n":89,"a":"B","q":"Why are corner points generally considered more stable and reliable features than edge points when used for image matching algorithms?","o":["Corner points are always brighter than edge points.","Corner regions have contents that change significantly when the sliding window moves in all directions.","Edge regions contain higher pixel variance.","Edge points only appear in the four corners of the image."],"c":2},{"n":90,"a":"C","q":"In the context of the Homography Matrix H relating two 2D images, why does H only possess 8 degrees of freedom, despite being a 3 × 3 matrix with 9 elements?","o":["One row is always zero.","It must be an orthogonal matrix.","The relationship is determined only up to a scale, allowing one element (e.g., H33) to be fixed (e.g., to 1).","It only requires 4 corresponding points, so 8 constraints are needed."],"c":3,"e":"H is defined only up to scale → fix H33 = 1 → 8 unknowns → 4 point pairs."},{"n":91,"a":"A","q":"Camera calibration involves estimating the intrinsic parameters (e.g., fx, fy, cx, cy, s) using a planar object (like a chessboard). The formulation leverages the properties of the rotation matrix columns R1 and R2. Which two constraints are primarily used?","o":["R1 ⋅ R2 = 0 (perpendicularity) and R1 ⋅ R1 = R2 ⋅ R2 (unit length).","R1 ⋅ R1 = 0 and R2 ⋅ R2 = 0.","R1 + R2 = R3.","det(R1) = det(R2)."],"c":3},{"n":92,"a":"B","q":"The final step in finding the solution P for the linear system AP = 0 (Projection Matrix) involves calculating the eigenvectors of ATA. Which eigenvector is chosen as the solution P?","o":["The eigenvector corresponding to the largest eigenvalue (λmax).","The eigenvector corresponding to the smallest eigenvalue (λmin ).","The eigenvector that is orthogonal to A.","The average of all eigenvectors."],"c":3},{"n":93,"a":"D","q":"Given the camera calibration matrix K and projection matrix P, P can be decomposed into P = K[R|T]. To accurately decompose M = KR (the 3 × 3 component of P) into the upper triangular matrix K and the orthogonal matrix R, which decomposition method is typically applied to M −1?","o":["LU Decomposition","Singular Value Decomposition (SVD)","Eigenvalue Decomposition (EIG)","QR Decomposition"],"free":true,"c":3,"e":"Marked \"free\". Correct answer: QR decomposition applied to M⁻¹ → K = R⁻¹ (upper triangular), R = Q⁻¹ (orthogonal)."},{"n":94,"a":"C","q":"In the SIFT keypoint detection (Step 1), the local extrema X are selected if they are larger or smaller than their neighbors. How many neighbors are typically checked for a local extrema across the scale-space pyramid?","o":["8 neighbors (only in the current scale).","18 neighbors (in current and adjacent scales).","26 neighbors (in current, upper, and lower scales).","36 neighbors (using 36 orientation bins)."],"c":2,"e":"8 neighbours in the same scale + 9 above + 9 below = 26."},{"n":95,"a":"C","q":"In the photometric image formation model, why is the overall light reaching the sensor often described by Phong shading?","o":["It only accounts for diffuse reflection.","It simplifies the BRDF to a constant.","It combines diffuse, specular, and ambient reflection components.","It is used primarily for geometric projection."],"c":3},{"n":96,"a":"B","q":"What is the consequence of the “many-to-one” projection property in the pinhole camera model?","o":["All 3D points in the scene project to the film.","All points along the same light ray in 3D space map to the same single point in the image plane.","Only points close to the COP are visible.","The image appears inverted on the film."],"c":3},{"n":97,"a":"C","q":"You have a linear algebra problem A ⋅ v = λ ⋅ v. If vector v is chosen as the solution P for projection matrix calculation, and AT A ⋅ P = λ ⋅ P is used, what is the resulting value of the objective function PT AT AP, assuming P is normalized (‖P‖ = 1)?","o":["1","0","λ (The corresponding eigenvalue)","λ2"],"c":3,"e":"PᵀAᵀAP = Pᵀ(λP) = λ‖P‖² = λ. That is why we pick the eigenvector with the smallest λ."},{"n":98,"a":"B","q":"The concept of PCA involves finding new directions (principal axes) in n-dimensional space. What desirable property do these principal axes have?","o":["They must be parallel to the original axes.","The covariance among each pair of principal axes is zero (they are uncorrelated).","They must have unit length only.","They are always randomly initialized."],"c":2},{"n":99,"a":"C","q":"When are two images guaranteed to be related by a homography, independently of the structure of the scene?","o":["Only when the scene is entirely non-planar.","When both images are viewed from the same plan, but the camera position has substantially translated.","When the images are taken from the same camera position (Center of Projection) but rotated to different angles.","When SIFT features are used for matching."],"c":3},{"n":100,"a":"A","q":"Given the initial points X1 = (5,2), X2 = (0,2), X3 = (6,1), and X4 = (8,3) (in 2D space), determine the identity of a mysterious guy P = (5,2) using Nearest Neighbor classification based on the Sum of Absolute Distance (SAD).","o":["X1 = (5,2)","X2 = (0,2)","X3 = (6,1)","X4 = (8,3)"],"c":2,"e":"SAD to X1 = 0 (same point) → X1."},{"n":101,"a":"C","q":"A camera with focal length f = 50 mm captures an object Z = 2 m away. What is the image distance (in mm) assuming thin-lens model (1/f = 1/Z + 1/z′)?","o":["52.6 mm","50.1 mm","51.3 mm","49.8 mm"],"c":3,"e":"1/z′ = 1/50 − 1/2000 = 39/2000 → z′ = 51.28 mm."},{"n":102,"a":"B","q":"In a pinhole camera, an object 2 m tall is 10 m away, with focal length 50 mm. What is the projected image height y′ = f·Y/Z?","o":["5 mm","10 mm","20 mm","100 mm"],"c":3,"e":"y′ = 50 mm × 2 m / 10 m = 10 mm."},{"n":103,"a":"B","q":"If two cameras form a stereo pair with baseline = 0.1 m, focal length = 800 pixels, and measured disparity = 40 pixels, what is the depth Z = fB/d?","o":["1.6 m","2.0 m","1.8 m","2.5 m"],"c":4,"e":"Z = 800 × 0.1 / 40 = 2.0 m."},{"n":104,"a":"B","q":"A SIFT descriptor block has 4×4 cells, each with 8 orientation bins. What is the total feature vector dimension?","o":["64","128","256","512"],"c":2,"e":"4×4 cells × 8 bins = 128."},{"n":105,"a":"C","q":"For PCA, given eigenvalues [3.0, 1.0, 0.5], what percentage of total variance is explained by the first component?","o":["50%","60%","66.7%","75%"],"c":2,"e":"3 / (3 + 1 + 0.5) = 3/4.5 = 66.7%."},{"n":106,"a":"B","q":"If the gradient components at a pixel are Gx = 3, Gy = 4, what is the gradient magnitude √(Gx² + Gy²)?","o":["4","5","6","7"],"c":2,"e":"√(9 + 16) = 5."},{"n":107,"a":"B","q":"In HOG feature extraction, the gradient directions in one cell are [10°, 20°, 30°, 170°]. If bins are 0°– 180° with 9 bins, which bin width is used?","o":["10°","20°","30°","40°"],"c":2,"e":"180° / 9 = 20°."},{"n":108,"a":"A","q":"A homography H = [[2,0,0],[0,2,0],[0,0,1]] maps point p = (3, 4, 1). What is p′ = H·p?","o":["(6, 8, 1)","(3, 4, 2)","(6, 4, 1)","(3, 8, 1)"],"c":3,"e":"(2·3, 2·4, 1) = (6, 8, 1)."},{"n":109,"a":"A","q":"In camera projection, s[x, y, 1]ᵀ = K[R|t][X, Y, Z, 1]ᵀ. If K = [[1000,0,0],[0,1000,0],[0,0,1]], R = I, t = 0, and (X,Y,Z) = (0.1, 0.2, 2), what are the projected pixel coordinates (x, y)?","o":["(50, 100)","(100, 200)","(0.05, 0.1)","(10, 20)"],"c":3,"e":"x = 1000·0.1/2 = 50, y = 1000·0.2/2 = 100."}]</script>
+<script>
+(function(){
+  var views=["overview","theory","exam-2022","exam-2023","practice","quiz"];
+  function show(){
+    var h=(location.hash||"").slice(1); if(views.indexOf(h)<0) h="overview";
+    views.forEach(function(v){document.getElementById("v-"+v).hidden=(v!==h)});
+    document.querySelectorAll("nav.tabs a").forEach(function(a){ if(a.dataset.v===h) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current")});
+  }
+  window.addEventListener("hashchange",function(){show();window.scrollTo(0,0)});
+  show();
+  document.querySelectorAll("[data-jump]").forEach(function(a){a.addEventListener("click",function(e){e.preventDefault();var t=document.getElementById(a.dataset.jump);if(t)t.scrollIntoView({behavior:"smooth",block:"start"})})});
+
+  var data=JSON.parse(document.getElementById("mcq").textContent);
+  var KEY="cv-mcq-114-1-en", st={};
+  try{st=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){st={}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+  var order=data.map(function(_,i){return i}), onlyWrong=false;
+  var chNames={1:"Unit 1",2:"Unit 2",3:"Unit 3",4:"Unit 4"};
+  var list=document.getElementById("qz-list"), sel=document.getElementById("qz-ch");
+  function score(){var a=0,c=0;Object.keys(st).forEach(function(n){a++;var q=data.find(function(d){return d.n==n});if(q&&st[n]===q.a)c++});document.getElementById("qz-score").textContent=c+" correct / "+a+" answered";}
+  function render(){
+    list.textContent="";var ch=+sel.value;
+    order.forEach(function(i){
+      var q=data[i]; if(ch&&q.c!==ch) return;
+      if(onlyWrong&&!(st[q.n]&&st[q.n]!==q.a)) return;
+      var box=document.createElement("div");box.className="mcq";
+      var p=document.createElement("p");p.className="qt";
+      var tag=document.createElement("span");tag.className="tag";tag.textContent=chNames[q.c]+(q.free?" · free":"");
+      var num=document.createElement("span");num.className="qn";num.textContent=q.n+".";
+      p.appendChild(tag);p.appendChild(num);p.appendChild(document.createTextNode(q.q));box.appendChild(p);
+      var opts=document.createElement("div");opts.className="opts";
+      var ex=document.createElement("p");ex.className="ex";ex.hidden=true;
+      function reveal(pick){
+        opts.querySelectorAll("button").forEach(function(b){b.disabled=true;var L=b.dataset.l;if(L===q.a)b.classList.add("right");else if(L===pick)b.classList.add("wrong")});
+        ex.textContent="";var b=document.createElement("b");b.textContent="Answer "+q.a+". ";ex.appendChild(b);if(q.e)ex.appendChild(document.createTextNode(q.e));ex.hidden=false;
+      }
+      q.o.forEach(function(o,k){
+        var L="ABCD"[k];var b=document.createElement("button");b.type="button";b.dataset.l=L;b.id="q"+q.n+L;
+        var bb=document.createElement("b");bb.textContent=L;var s=document.createElement("span");s.textContent=o;b.appendChild(bb);b.appendChild(s);
+        b.addEventListener("click",function(){st[q.n]=L;save();reveal(L);score()});
+        opts.appendChild(b);
+      });
+      box.appendChild(opts);box.appendChild(ex);
+      if(st[q.n]) reveal(st[q.n]);
+      list.appendChild(box);
+    });
+    if(!list.children.length){var e=document.createElement("p");e.className="lede";e.textContent=onlyWrong?"No missed questions in this selection.":"No questions.";list.appendChild(e)}
+    score();
+  }
+  sel.addEventListener("change",render);
+  document.getElementById("qz-wrong").addEventListener("click",function(){onlyWrong=!onlyWrong;this.classList.toggle("on",onlyWrong);render()});
+  document.getElementById("qz-shuffle").addEventListener("click",function(){for(var i=order.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=order[i];order[i]=order[j];order[j]=t}render()});
+  document.getElementById("qz-reset").addEventListener("click",function(){st={};save();order=data.map(function(_,i){return i});render()});
+  render();
+})();
+</script>
+
+</body>
+</html>
